@@ -8,6 +8,17 @@ import java.nio.file.Path;
 
 public class TableInitializationContextImpl implements TableInitializationContext {
 
+    private final String tableName;
+    private final Path tablePath;
+    private final TableIndex tableIndex;
+    private volatile Segment currentSegment;
+
+    public TableInitializationContextImpl(String tableName, Path databasePath, TableIndex tableIndex) {
+        this.tableName = tableName;
+        this.tablePath = databasePath.resolve(tableName);
+        this.tableIndex = tableIndex;
+    }
+
     @Override
     public String getTableName() {
         //todo
