@@ -11,35 +11,28 @@ import java.util.Map;
 @Getter
 public class DatabaseInitializationContextImpl implements DatabaseInitializationContext {
 
-    private String dbName;
-    private Path databasePath;
-    private Map<String, Table> tables = new HashMap<>(16);
 
     public DatabaseInitializationContextImpl(String dbName, Path databaseRoot) {
-        this.dbName = dbName;
-        this.databasePath = databaseRoot.resolve(dbName);
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public String getDbName() {
-        //todo
-        return null;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public Path getDatabasePath() {
-        //todo
-        return null;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public Map<String, Table> getTables() {
-        //todo
-        return null;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public void addTable(Table table) {
-        //todo
+        throw new UnsupportedOperationException(); // todo implement
     }
 }

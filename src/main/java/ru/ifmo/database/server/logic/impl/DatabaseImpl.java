@@ -11,63 +11,37 @@ import java.util.Map;
 import java.util.Objects;
 
 public class DatabaseImpl implements Database {
-    private final String dbName;
-    private final Path databasePath;
-    private final Map<String, Table> tables;
-
-    private DatabaseImpl(String dbName, Path databaseRoot) {
-        Objects.requireNonNull(dbName);
-        Objects.requireNonNull(databaseRoot);
-
-        this.dbName = dbName;
-        this.databasePath = databaseRoot.resolve(dbName);
-        this.tables = new HashMap<>(16);
-    }
-
-    private DatabaseImpl(DatabaseInitializationContext context) {
-        this.dbName = context.getDbName();
-        this.databasePath = context.getDatabasePath();
-        this.tables = context.getTables();
-    }
 
     public static Database create(String dbName, Path databaseRoot) throws DatabaseException {
-        DatabaseImpl db = new DatabaseImpl(dbName, databaseRoot);
-        db.initializeAsNew();
-        return db;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     public static Database initializeFromContext(DatabaseInitializationContext context) {
-        return new DatabaseImpl(context);
-    }
-
-    private void initializeAsNew() throws DatabaseException {
-        //todo
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public String getName() {
-        //todo
-        return null;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public void createTableIfNotExists(String tableName) throws DatabaseException {
-        //todo
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public void createTableIfNotExists(String tableName, int segmentSizeInBytes) throws DatabaseException {
-        //todo
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public void write(String tableName, String objectKey, String objectValue) throws DatabaseException {
-        //todo
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public String read(String tableName, String objectKey) throws DatabaseException {
-        //todo
-        return null;
+        throw new UnsupportedOperationException(); // todo implement
     }
 }

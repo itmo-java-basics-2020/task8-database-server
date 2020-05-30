@@ -18,49 +18,27 @@ import java.nio.file.Path;
  * и хранящую файлы-сегменты данной таблицы
  */
 public class TableImpl implements Table {
-    private final String tableName;
-    private final Path tablePath;
-    private final TableIndex tableIndex;
-    private Segment currentSegment;
-
-    private TableImpl(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) {
-        this.tableName = tableName;
-        this.tablePath = pathToDatabaseRoot.resolve(tableName);
-
-        this.tableIndex = tableIndex;
-    }
-
-    private TableImpl(TableInitializationContext context) {
-        this.tableName = context.getTableName();
-        this.tablePath = context.getTablePath();
-        this.tableIndex = context.getTableIndex();
-        this.currentSegment = context.getCurrentSegment();
-    }
 
     static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
-        TableImpl tb = new TableImpl(tableName, pathToDatabaseRoot, tableIndex);
-        tb.initializeAsNew();
-        return new CachingTable(tb);
+        throw new UnsupportedOperationException(); // todo implement
+    }
+
+    public static Table initializeFromContext(TableInitializationContext context) {
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public String getName() {
-        //todo
-        return null;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public void write(String objectKey, String objectValue) throws DatabaseException {
-        //todo
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public String read(String objectKey) throws DatabaseException {
-        //todo
-        return null;
-    }
-
-    private void initializeAsNew() throws DatabaseException {
-        //todo
+        throw new UnsupportedOperationException(); // todo implement
     }
 }

@@ -14,6 +14,6 @@ public class TableInitializer implements Initializer {
 
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
-        //todo
+        throw new UnsupportedOperationException(); // todo implement
     }
 }

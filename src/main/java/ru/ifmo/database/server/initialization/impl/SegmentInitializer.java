@@ -8,6 +8,6 @@ public class SegmentInitializer implements Initializer {
 
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
-
+        throw new UnsupportedOperationException(); // todo implement
     }
 }

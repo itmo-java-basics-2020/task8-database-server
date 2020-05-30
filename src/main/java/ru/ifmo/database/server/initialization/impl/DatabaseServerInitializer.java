@@ -12,6 +12,7 @@ public class DatabaseServerInitializer implements Initializer {
         this.databaseInitializer = databaseInitializer;
     }
 
+
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
         //todo

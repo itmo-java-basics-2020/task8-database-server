@@ -16,61 +16,36 @@ import java.nio.file.Path;
  * - является неизменяемым после появления более нового сегмента
  */
 public class SegmentImpl implements Segment {
-    private static final long MAX_SEGMENT_SIZE = 100_000L;
-
-    private final String segmentName;
-    private final Path segmentPath;
-    private final SegmentIndex segmentIndex;
-
-    private long currentSizeInBytes;
-    private volatile boolean readOnly = false;
-
-    private SegmentImpl(String segmentName, Path tableRootPath) {
-        this.segmentName = segmentName;
-        this.segmentPath = tableRootPath.resolve(segmentName);
-        this.segmentIndex = new SegmentIndex();
-        this.currentSizeInBytes = 0;
-    }
 
     public SegmentImpl(SegmentInitializationContext context) {
-        this.readOnly = true;
-        this.segmentName = context.getSegmentName();
-        this.segmentPath = context.getSegmentPath();
-        this.segmentIndex = context.getIndex();
-        this.currentSizeInBytes = context.getCurrentSize();
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
-        SegmentImpl sg = new SegmentImpl(segmentName, tableRootPath);
-        sg.initializeAsNew();
-        return sg;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
-    private void initializeAsNew() throws DatabaseException {
-        //todo
+    static String createSegmentName(String tableName) {
+        return tableName + "_" + System.currentTimeMillis();
     }
 
     @Override
     public String getName() {
-        //todo
-        return null;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public boolean write(String objectKey, String objectValue) throws IOException, DatabaseException {
-        //todo
-        return false;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public String read(String objectKey) throws IOException {
-        //todo
-        return null;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public boolean isReadOnly() {
-        //todo
-        return false;
+        throw new UnsupportedOperationException(); // todo implement
     }
 }

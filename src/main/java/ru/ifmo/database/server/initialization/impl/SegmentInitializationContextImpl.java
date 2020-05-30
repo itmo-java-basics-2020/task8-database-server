@@ -7,39 +7,27 @@ import java.nio.file.Path;
 
 public class SegmentInitializationContextImpl implements SegmentInitializationContext {
 
-    private final String segmentName;
-    private final Path segmentPath;
-    private final int currentSize;
-    private final SegmentIndex index;
-
     private SegmentInitializationContextImpl(String segmentName, Path segmentPath, int currentSize, SegmentIndex index) {
-        this.segmentName = segmentName;
-        this.segmentPath = segmentPath;
-        this.currentSize = currentSize;
-        this.index = index;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public String getSegmentName() {
-        //todo
-        return null;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public Path getSegmentPath() {
-        //todo
-        return null;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public SegmentIndex getIndex() {
-        //todo
-        return null;
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public int getCurrentSize() {
-        //todo
-        return 0;
+        throw new UnsupportedOperationException(); // todo implement
     }
 }

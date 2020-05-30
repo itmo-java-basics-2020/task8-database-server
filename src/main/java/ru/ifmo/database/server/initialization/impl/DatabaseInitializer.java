@@ -13,6 +13,6 @@ public class DatabaseInitializer implements Initializer {
 
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
-        //todo
+        throw new UnsupportedOperationException(); // todo implement
     }
 }

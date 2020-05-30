@@ -6,12 +6,11 @@ public class AbstractDatabaseIndex<K, V> implements DatabaseIndex<K, V> {
 
     @Override
     public void onIndexedEntityUpdated(K key, V value) {
-        //todo
+        throw new UnsupportedOperationException(); // todo implement
     }
 
     @Override
     public Optional<V> searchForKey(K key) {
-        //todo
-        return null;
+        throw new UnsupportedOperationException(); // todo implement
     }
 }

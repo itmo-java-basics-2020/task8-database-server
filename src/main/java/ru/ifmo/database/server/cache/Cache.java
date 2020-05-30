@@ -1,4 +1,4 @@
-package ru.ifmo.database.server;
+package ru.ifmo.database.server.cache;
 
 public interface Cache {
     String get(String key);
