@@ -147,22 +147,22 @@ public class DatabaseServerTest {
                     server.executeNextCommand(
                             "UPDATE_KEY " + note.getDb() + " " + note.getTable() +
                                     " " + note.getKey() + " " + value);
-                    mapStorage.put(note.getKey(), value);
+                    mapStorage.put(note.getDb() + note.getTable() + note.getKey(), value);
 
                     break;
                 }
                 case READ_KEY: {
-                    if (!mapStorage.containsKey(note.getKey()))
+                    if (!mapStorage.containsKey(note.getDb() + note.getTable() + note.getKey()))
                         break;
 
                     DatabaseCommandResult commandResult = server.executeNextCommand(
-                            "READ_KEY " + note.getDb() + " " + note.getTable() + " " + note.getValue());
+                            "READ_KEY " + note.getDb() + " " + note.getTable() + " " + note.getKey());
 
                     if (commandResult.isSuccess()) {
-                        Assert.assertEquals(mapStorage.get(note.getKey()), commandResult.getResult().get());
+                        Assert.assertEquals(mapStorage.get(note.getDb() + note.getTable() + note.getKey()), commandResult.getResult().get());
                     }
                     else {
-                        Assert.fail(commandResult.getErrorMessage() + note.getKey());
+                        Assert.fail(commandResult.getErrorMessage() + " " + note.getKey());
                     }
                     break;
                 }
