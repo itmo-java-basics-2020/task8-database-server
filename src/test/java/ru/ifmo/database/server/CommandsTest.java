@@ -3,16 +3,20 @@ package ru.ifmo.database.server;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.SneakyThrows;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 import ru.ifmo.database.DatabaseServer;
 import ru.ifmo.database.server.console.DatabaseCommandResult;
 import ru.ifmo.database.server.console.DatabaseCommands;
 import ru.ifmo.database.server.console.ExecutionEnvironment;
 import ru.ifmo.database.server.exception.DatabaseException;
+import ru.ifmo.database.server.initialization.InitializationContext;
 import ru.ifmo.database.server.initialization.impl.DatabaseInitializer;
 import ru.ifmo.database.server.initialization.impl.DatabaseServerInitializer;
 import ru.ifmo.database.server.initialization.impl.SegmentInitializer;
@@ -20,6 +24,7 @@ import ru.ifmo.database.server.initialization.impl.TableInitializer;
 import ru.ifmo.database.server.logic.Database;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,7 +37,6 @@ import static org.mockito.Mockito.when;
 import static ru.ifmo.database.server.console.DatabaseCommandResult.DatabaseCommandStatus.FAILED;
 import static ru.ifmo.database.server.console.DatabaseCommandResult.DatabaseCommandStatus.SUCCESS;
 
-@RunWith(MockitoJUnitRunner.class)
 public class CommandsTest {
 
     private static final String DB_NAME = "db_1";
@@ -43,18 +47,23 @@ public class CommandsTest {
 
     private static final String VALUE = "value";
 
+    private static final String PREV_VALUE = "prev_value";
+
     @Mock
     public Database database;
 
     @Mock
     public ExecutionEnvironment env;
 
+    public Path path = Path.of("/");
 
-    @InjectMocks
-    public DatabaseServer server = new DatabaseServer(env,
-            new DatabaseServerInitializer(new DatabaseInitializer(new TableInitializer(new SegmentInitializer()))));
+    public DatabaseServer server;
 
     public CommandsTest() throws IOException, DatabaseException {
+        MockitoAnnotations.initMocks(this);
+        when(env.getWorkingPath()).thenReturn(path);
+        server = new DatabaseServer(env,
+                new DatabaseServerInitializer(new DatabaseInitializer(new TableInitializer(new SegmentInitializer()))));
     }
 
     // ================= update key tests =================
@@ -149,6 +158,7 @@ public class CommandsTest {
     public void test_updateKey_success() throws DatabaseException {
         when(env.getDatabase(DB_NAME)).thenReturn(Optional.of(database));
         doNothing().when(database).write(TABLE_NAME, KEY_NAME, VALUE);
+        when(database.read(TABLE_NAME, KEY_NAME)).thenReturn(PREV_VALUE);
 
         Command command = Command.builder()
                 .name(DatabaseCommands.UPDATE_KEY.name())
