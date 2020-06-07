@@ -56,7 +56,7 @@ public class CacheTest {
         when(table.read(key)).thenReturn(value);
 
         assertEquals(cachingTable.read(key), value);
-        verify(cache).get(value);
+        verify(cache).get(key);
     }
 
     @Test
