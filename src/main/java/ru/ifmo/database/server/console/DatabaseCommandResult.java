@@ -19,8 +19,8 @@ public interface DatabaseCommandResult {
     static DatabaseCommandResult error(Exception exception) {
         Objects.requireNonNull(exception);
         String message = exception.getMessage() != null
-            ? exception.getMessage()
-            : Arrays.toString(exception.getStackTrace());
+                ? exception.getMessage()
+                : Arrays.toString(exception.getStackTrace());
         return DatabaseCommandResult.error(message);
     }
 

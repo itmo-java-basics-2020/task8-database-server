@@ -7,7 +7,7 @@ import java.nio.file.Path;
 public interface SegmentInitializationContext {
     String getSegmentName();
 
-    Path getSegmentPath();
+    Path getTableRootPath();
 
     SegmentIndex getIndex();
 

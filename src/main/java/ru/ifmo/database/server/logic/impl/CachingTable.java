@@ -2,6 +2,7 @@ package ru.ifmo.database.server.logic.impl;
 
 import ru.ifmo.database.server.cache.DatabaseCache;
 import ru.ifmo.database.server.exception.DatabaseException;
+import ru.ifmo.database.server.logic.Segment;
 import ru.ifmo.database.server.logic.Table;
 
 public class CachingTable implements Table {
@@ -26,5 +27,15 @@ public class CachingTable implements Table {
     @Override
     public String read(String objectKey) throws DatabaseException {
         throw new UnsupportedOperationException(); // todo implement
+    }
+
+    @Override
+    public void addSegment(String segmentName, Segment segment) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Segment getSegment(String segmentName) {
+        throw new UnsupportedOperationException();
     }
 }

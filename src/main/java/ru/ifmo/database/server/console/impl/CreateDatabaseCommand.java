@@ -6,6 +6,8 @@ import ru.ifmo.database.server.console.ExecutionEnvironment;
 import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.logic.DatabaseFactory;
 
+import java.nio.file.Path;
+
 public class CreateDatabaseCommand implements DatabaseCommand {
 
     private final ExecutionEnvironment env;
@@ -23,7 +25,7 @@ public class CreateDatabaseCommand implements DatabaseCommand {
 
     @Override
     public DatabaseCommandResult execute() throws DatabaseException {
-        env.addDatabase(databaseFactory.createNonExistent(databaseName, env.getWorkingPath()));
+        env.addDatabase(databaseFactory.createNonExistent(databaseName, Path.of(env.getWorkingPath().toString() + "\\" + databaseName)));
         return DatabaseCommandResult.success("Database: " + databaseName + "created");
     }
 }

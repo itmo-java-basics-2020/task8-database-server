@@ -5,7 +5,8 @@ import ru.ifmo.database.server.index.impl.SegmentIndex;
 import ru.ifmo.database.server.initialization.SegmentInitializationContext;
 import ru.ifmo.database.server.logic.Segment;
 
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -17,12 +18,35 @@ import java.nio.file.Path;
  */
 public class SegmentImpl implements Segment {
 
-    public SegmentImpl(SegmentInitializationContext context) {
-        throw new UnsupportedOperationException(); // todo implement
+    private boolean isReadOnly;
+    private final String segmentName;
+    private final Path tableRootPath;
+    private final SegmentIndex segmentIndex;
+    private Integer segmentSize;
+
+    private SegmentImpl(String segmentName, Path tableRootPath, SegmentIndex segmentIndex) {
+        try {
+            if (!Files.exists(Path.of(tableRootPath.toString() + "\\" + segmentName))) {
+                Files.createFile(Path.of(tableRootPath.toString() + "\\" + segmentName));
+                segmentSize = 0;
+            } else {
+                segmentSize = (int) new File(tableRootPath.toString() + "\\" + segmentName).length();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            this.segmentName = segmentName;
+            this.tableRootPath = tableRootPath;
+            this.segmentIndex = segmentIndex;
+        }
     }
 
-    static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
+    public static SegmentImpl initializeFromContext(SegmentInitializationContext context) {
+        return new SegmentImpl(context.getSegmentName(), context.getTableRootPath(), context.getIndex());
+    }
+
+    public static SegmentImpl create(String segmentName, Path tableRootPath) throws DatabaseException {
+        return new SegmentImpl(segmentName, tableRootPath, new SegmentIndex());
     }
 
     static String createSegmentName(String tableName) {
@@ -31,21 +55,53 @@ public class SegmentImpl implements Segment {
 
     @Override
     public String getName() {
-        throw new UnsupportedOperationException(); // todo implement
+        return segmentName;
     }
 
     @Override
-    public boolean write(String objectKey, String objectValue) throws IOException, DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
+    public boolean write(String objectKey, String objectValue) throws DatabaseException {
+        boolean answer;
+        try {
+            answer = (new DatabaseOutputStream(new FileOutputStream(tableRootPath.toString() + "\\" + segmentName, true))
+                    .write(new DatabaseStoringUnit(objectKey, objectValue))) == 1;
+        } catch (IOException e) {
+            throw new DatabaseException("No such segment");
+        }
+        return answer;
     }
 
     @Override
-    public String read(String objectKey) throws IOException {
-        throw new UnsupportedOperationException(); // todo implement
+    public String read(String objectKey) throws DatabaseException {
+        if (!segmentIndex.ifContains(objectKey)) {
+            throw new DatabaseException("No such key");
+        } else {
+            int offset = segmentIndex.getSegmentIndexInfo(objectKey).getOffset();
+            String value;
+            try (DatabaseInputStream in = new DatabaseInputStream(new FileInputStream(tableRootPath + "\\" + segmentName))) {
+                DatabaseStoringUnit dbStoringUnit = in.readDbUnit(offset);
+                if (dbStoringUnit == null) {
+                    throw new DatabaseException("No value found");
+                }
+                value = new String(dbStoringUnit.getValue());
+                return value;
+            } catch (IOException e) {
+                throw new DatabaseException("No value connected to this key");
+            }
+        }
     }
 
     @Override
     public boolean isReadOnly() {
-        throw new UnsupportedOperationException(); // todo implement
+        return isReadOnly;
+    }
+
+    @Override
+    public void turnToReadOnly() {
+        isReadOnly = true;
+    }
+
+    @Override
+    public Integer getSegmentSize() {
+        return segmentSize;
     }
 }
