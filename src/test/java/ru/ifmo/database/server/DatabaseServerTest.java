@@ -1,6 +1,10 @@
 package ru.ifmo.database.server;
 
+import lombok.Getter;
+import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -27,7 +31,15 @@ import java.util.stream.Stream;
 
 @RunWith(JUnit4.class)
 public class DatabaseServerTest {
+
+    private Random random = new Random();
     private Map<String, String> mapStorage = new ConcurrentHashMap<>();
+
+    @Before
+    @SneakyThrows
+    public void clearStorageFolder() {
+        FileUtils.deleteDirectory((new ExecutionEnvironmentImpl()).getWorkingPath().toFile());
+    }
 
     @Test
     public void checkStorageCorrectness() throws IOException, DatabaseException {
@@ -47,8 +59,6 @@ public class DatabaseServerTest {
 
         Arrays.stream(initCommands)
                 .forEach(databaseServer::executeNextCommand);
-
-        Random random = new Random();
 
         List<String> allowedKeys = Stream.generate(() -> random.nextInt(100_000))
                 .map(i -> "test_key_" + i)
@@ -85,6 +95,88 @@ public class DatabaseServerTest {
                     break;
                 }
             }
+        }
+    }
+
+    @Test
+    public void test_initializationOneOne() {
+        testInitialization(1, 1, 100_000);
+    }
+
+    @Test
+    public void test_initializationOneMany() {
+        testInitialization(1, 100, 100_000);
+    }
+
+    @Test
+    public void test_initializationManyOne() {
+        testInitialization(100, 1, 100_000);
+    }
+
+    @Test
+    public void test_initializationManyMany() {
+        testInitialization(10, 10, 100_000);
+    }
+
+    @Test
+    public void test_initializationManyManyHard() {
+        testInitialization(25, 25, 1_000_000);
+    }
+
+    @SneakyThrows
+    private void testInitialization(int countDb, int countTables, int countNotes) {
+        Initializer initializer = new DatabaseServerInitializer(
+                new DatabaseInitializer(new TableInitializer(new SegmentInitializer())));
+        DatabaseServer server = new DatabaseServer(new ExecutionEnvironmentImpl(), initializer);
+
+        List<String> dbNames = Stream.generate(() -> random.nextInt(100_000))
+                .map(i -> "db_" + i)
+                .limit(countDb)
+                .collect(Collectors.toList());
+        List<String> tablesNames = Stream.generate(() -> random.nextInt(100_000))
+                .map(i -> "table_" + i)
+                .limit(countTables)
+                .collect(Collectors.toList());
+        dbNames.forEach(dbName -> tablesNames.forEach(tableName -> {
+            server.executeNextCommand("CREATE_DATABASE " + dbName);
+            server.executeNextCommand("CREATE_TABLE " + dbName + " " + tableName);
+        }));
+
+        List<NoteInfo> data = Stream.generate(() -> random.nextInt(100_000_000))
+                .map(i -> new NoteInfo(
+                        dbNames.get(random.nextInt(countDb)),
+                        tablesNames.get(random.nextInt(countTables)),
+                        "key_" + i,
+                        "value_" + i))
+                .limit(countNotes)
+                .collect(Collectors.toList());
+
+        data.forEach(kv -> server.executeNextCommand(
+                "UPDATE_KEY " + kv.getDb() + " " + kv.getTable() + " " + kv.getKey() + " " + kv.getValue()));
+
+
+        DatabaseServer server2 = new DatabaseServer(new ExecutionEnvironmentImpl(), initializer);
+
+        data.forEach(note ->
+                Assert.assertEquals(
+                        server2.executeNextCommand("READ_KEY " + note.getDb() + " " + note.getTable() + " " + note.getKey())
+                                .getResult().get(),
+                        note.getValue()));
+    }
+
+    @Getter
+    static class NoteInfo {
+
+        private final String db;
+        private final String table;
+        private final String key;
+        private final String value;
+
+        NoteInfo(String db, String table, String key, String value) {
+            this.db = db;
+            this.table = table;
+            this.key = key;
+            this.value = value;
         }
     }
 }

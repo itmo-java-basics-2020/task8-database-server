@@ -55,6 +55,7 @@ public class CommandsTest {
     @Mock
     public ExecutionEnvironment env;
 
+    //todo change this path to some correct path
     public Path path = Path.of("/");
 
     public DatabaseServer server;
