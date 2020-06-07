@@ -1,6 +1,7 @@
 package ru.ifmo.database.server;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
@@ -33,7 +34,6 @@ import java.util.stream.Stream;
 public class DatabaseServerTest {
 
     private Random random = new Random();
-    private Map<String, String> mapStorage = new ConcurrentHashMap<>();
 
     @Before
     @SneakyThrows
@@ -43,6 +43,7 @@ public class DatabaseServerTest {
 
     @Test
     public void checkStorageCorrectness() throws IOException, DatabaseException {
+        Map<String, String> mapStorage = new ConcurrentHashMap<>();
         Initializer initializer = new DatabaseServerInitializer(
                 new DatabaseInitializer(new TableInitializer(new SegmentInitializer())));
 
@@ -78,6 +79,7 @@ public class DatabaseServerTest {
                     String value = key + "_" + i;
                     databaseServer.executeNextCommand(
                             "UPDATE_KEY " + dbName + " " + tableName + " " + key + " " + value);
+                    System.out.println(key);
                     mapStorage.put(key, value);
 
                     break;
@@ -90,7 +92,78 @@ public class DatabaseServerTest {
                             "READ_KEY " + dbName + " " + tableName + " " + key);
 
                     if (commandResult.isSuccess()) {
-                        Assert.assertEquals("Key : " + key, mapStorage.get(key), commandResult.getResult().get());
+                        Assert.assertEquals(mapStorage.get(key), commandResult.getResult().get());
+                    }
+                    else {
+                        Assert.fail(commandResult.getErrorMessage() + " " + key);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    @Test
+    public void checkStorageCorrectnessManyMany() throws IOException, DatabaseException {
+        Map<String, String> mapStorage = new ConcurrentHashMap<>();
+        Initializer initializer = new DatabaseServerInitializer(
+                new DatabaseInitializer(new TableInitializer(new SegmentInitializer())));
+        DatabaseServer server = new DatabaseServer(new ExecutionEnvironmentImpl(), initializer);
+
+        List<String> dbNames = Stream.generate(() -> random.nextInt(100_000))
+                .map(i -> "db_" + i)
+                .limit(10)
+                .collect(Collectors.toList());
+        List<String> tablesNames = Stream.generate(() -> random.nextInt(100_000))
+                .map(i -> "table_" + i)
+                .limit(10)
+                .collect(Collectors.toList());
+        dbNames.forEach(dbName -> {
+            server.executeNextCommand("CREATE_DATABASE " + dbName);
+            tablesNames.forEach(tableName ->
+                    server.executeNextCommand("CREATE_TABLE " + dbName + " " + tableName));
+        });
+
+        List<NoteInfo> data = Stream.generate(() -> random.nextInt(100_000_000))
+                .map(i -> new NoteInfo(
+                        dbNames.get(random.nextInt(10)),
+                        tablesNames.get(random.nextInt(10)),
+                        "key_" + i,
+                        "value_" + i))
+                .limit(100_000)
+                .collect(Collectors.toList());
+
+        Collections.shuffle(data);
+
+        for (int i = 0; i < 300_000; i++) {
+            DatabaseCommands commandType = random.nextDouble() > 0.9 ? DatabaseCommands.UPDATE_KEY : DatabaseCommands.READ_KEY;
+
+            NoteInfo note = data.get(random.nextInt(data.size()));
+
+            switch (commandType) {
+                case UPDATE_KEY: {
+                    String value = note.getValue() + "_" + i;
+                    note.setValue(value);
+
+                    server.executeNextCommand(
+                            "UPDATE_KEY " + note.getDb() + " " + note.getTable() +
+                                    " " + note.getKey() + " " + value);
+                    mapStorage.put(note.getKey(), value);
+
+                    break;
+                }
+                case READ_KEY: {
+                    if (!mapStorage.containsKey(note.getKey()))
+                        break;
+
+                    DatabaseCommandResult commandResult = server.executeNextCommand(
+                            "READ_KEY " + note.getDb() + " " + note.getTable() + " " + note.getValue());
+
+                    if (commandResult.isSuccess()) {
+                        Assert.assertEquals(mapStorage.get(note.getKey()), commandResult.getResult().get());
+                    }
+                    else {
+                        Assert.fail(commandResult.getErrorMessage() + note.getKey());
                     }
                     break;
                 }
@@ -137,10 +210,11 @@ public class DatabaseServerTest {
                 .map(i -> "table_" + i)
                 .limit(countTables)
                 .collect(Collectors.toList());
-        dbNames.forEach(dbName -> tablesNames.forEach(tableName -> {
+        dbNames.forEach(dbName -> {
             server.executeNextCommand("CREATE_DATABASE " + dbName);
-            server.executeNextCommand("CREATE_TABLE " + dbName + " " + tableName);
-        }));
+            tablesNames.forEach(tableName ->
+                server.executeNextCommand("CREATE_TABLE " + dbName + " " + tableName));
+        });
 
         List<NoteInfo> data = Stream.generate(() -> random.nextInt(100_000_000))
                 .map(i -> new NoteInfo(
@@ -165,12 +239,13 @@ public class DatabaseServerTest {
     }
 
     @Getter
+    @Setter
     static class NoteInfo {
 
-        private final String db;
-        private final String table;
-        private final String key;
-        private final String value;
+        private String db;
+        private String table;
+        private String key;
+        private String value;
 
         NoteInfo(String db, String table, String key, String value) {
             this.db = db;
