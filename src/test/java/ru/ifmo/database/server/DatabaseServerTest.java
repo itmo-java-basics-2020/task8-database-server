@@ -79,7 +79,6 @@ public class DatabaseServerTest {
                     String value = key + "_" + i;
                     databaseServer.executeNextCommand(
                             "UPDATE_KEY " + dbName + " " + tableName + " " + key + " " + value);
-                    System.out.println(key);
                     mapStorage.put(key, value);
 
                     break;
