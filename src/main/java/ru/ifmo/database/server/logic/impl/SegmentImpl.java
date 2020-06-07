@@ -62,8 +62,10 @@ public class SegmentImpl implements Segment {
     public boolean write(String objectKey, String objectValue) throws DatabaseException {
         boolean answer;
         try {
+            int offset = (int) new File(tableRootPath.toString() + "\\" + segmentName).length();
             answer = (new DatabaseOutputStream(new FileOutputStream(tableRootPath.toString() + "\\" + segmentName, true))
                     .write(new DatabaseStoringUnit(objectKey, objectValue))) == 1;
+            segmentIndex.updateSegmentMap(objectKey, offset);
         } catch (IOException e) {
             throw new DatabaseException("No such segment");
         }
