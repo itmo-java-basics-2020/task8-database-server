@@ -14,4 +14,3 @@ public interface DatabaseInitializationContext {
 
     void addTable(Table table);
 }
-

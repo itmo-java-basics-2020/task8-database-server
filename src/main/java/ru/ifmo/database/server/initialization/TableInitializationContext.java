@@ -14,5 +14,5 @@ public interface TableInitializationContext {
 
     Segment getCurrentSegment();
 
-    void updateCurrentSegment(Segment segment); // todo sukhoa refactor?
+    void updateCurrentSegment(Segment segment);
 }

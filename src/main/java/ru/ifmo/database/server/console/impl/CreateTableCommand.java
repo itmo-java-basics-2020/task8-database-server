@@ -29,7 +29,11 @@ public class CreateTableCommand implements DatabaseCommand {
         if (database.isEmpty()) {
             throw new DatabaseException("No such database: " + databaseName);
         }
-        database.get().createTableIfNotExists(tableName);
-        return DatabaseCommandResult.success("Created table: " + tableName);
+
+        if (database.get().createTableIfNotExists(tableName)) {
+            return DatabaseCommandResult.success("Created table: " + tableName);
+        } else {
+            return DatabaseCommandResult.error("Table '" + tableName + "' already exists");
+        }
     }
 }

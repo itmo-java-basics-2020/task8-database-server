@@ -18,4 +18,24 @@ public class DatabaseStoringUnit {
         this.value = value;
         valueSize = value.length;
     }
+
+    public int getSizeInFile() {
+        return 4 * 2 + key.length + value.length;
+    }
+
+    public int getKeySize() {
+        return keySize;
+    }
+
+    public byte[] getKey() {
+        return key;
+    }
+
+    public int getValueSize() {
+        return valueSize;
+    }
+
+    public byte[] getValue() {
+        return value;
+    }
 }

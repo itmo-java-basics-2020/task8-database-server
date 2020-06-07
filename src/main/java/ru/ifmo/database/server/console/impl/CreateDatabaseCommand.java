@@ -23,6 +23,10 @@ public class CreateDatabaseCommand implements DatabaseCommand {
 
     @Override
     public DatabaseCommandResult execute() throws DatabaseException {
+        if (env.getDatabase(databaseName).isPresent()) {
+            throw new DatabaseException("This database already exists");
+        }
+
         env.addDatabase(databaseFactory.createNonExistent(databaseName, env.getWorkingPath()));
         return DatabaseCommandResult.success("Database: " + databaseName + "created");
     }

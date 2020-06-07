@@ -28,9 +28,11 @@ public class ReadKeyCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() throws DatabaseException {
         Optional<Database> database = env.getDatabase(databaseName);
+
         if (database.isEmpty()) {
             throw new DatabaseException("No such database: " + databaseName);
         }
+
         String result = database.get().read(tableName, key);
         return DatabaseCommandResult.success(result);
     }

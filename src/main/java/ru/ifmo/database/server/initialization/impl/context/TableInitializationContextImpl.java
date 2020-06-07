@@ -1,4 +1,4 @@
-package ru.ifmo.database.server.initialization.impl;
+package ru.ifmo.database.server.initialization.impl.context;
 
 import ru.ifmo.database.server.index.impl.TableIndex;
 import ru.ifmo.database.server.initialization.TableInitializationContext;
@@ -8,32 +8,39 @@ import java.nio.file.Path;
 
 public class TableInitializationContextImpl implements TableInitializationContext {
 
+    private final String tableName;
+    private final Path databasePath;
+    private final TableIndex tableIndex;
+    private Segment currentSegment = null;
+
     public TableInitializationContextImpl(String tableName, Path databasePath, TableIndex tableIndex) {
-        throw new UnsupportedOperationException(); // todo implement
+        this.tableName = tableName;
+        this.tableIndex = tableIndex;
+        this.databasePath = databasePath;
     }
 
     @Override
     public String getTableName() {
-        throw new UnsupportedOperationException(); // todo implement
+        return tableName;
     }
 
     @Override
     public Path getTablePath() {
-        throw new UnsupportedOperationException(); // todo implement
+        return databasePath;
     }
 
     @Override
     public TableIndex getTableIndex() {
-        throw new UnsupportedOperationException(); // todo implement
+        return tableIndex;
     }
 
     @Override
     public Segment getCurrentSegment() {
-        throw new UnsupportedOperationException(); // todo implement
+        return currentSegment;
     }
 
     @Override
     public void updateCurrentSegment(Segment segment) {
-        throw new UnsupportedOperationException(); // todo implement
+        this.currentSegment = segment;
     }
 }

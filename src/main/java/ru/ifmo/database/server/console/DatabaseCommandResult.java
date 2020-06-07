@@ -7,20 +7,18 @@ import java.util.Optional;
 public interface DatabaseCommandResult {
 
     static DatabaseCommandResult success(String result) {
-        Objects.requireNonNull(result);
         return new DatabaseCommandResultImpl(result, null, DatabaseCommandStatus.SUCCESS);
     }
 
     static DatabaseCommandResult error(String message) {
-        Objects.requireNonNull(message);
         return new DatabaseCommandResultImpl(null, message, DatabaseCommandStatus.FAILED);
     }
 
     static DatabaseCommandResult error(Exception exception) {
         Objects.requireNonNull(exception);
         String message = exception.getMessage() != null
-            ? exception.getMessage()
-            : Arrays.toString(exception.getStackTrace());
+                ? exception.getMessage()
+                : Arrays.toString(exception.getStackTrace());
         return DatabaseCommandResult.error(message);
     }
 
