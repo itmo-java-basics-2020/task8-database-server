@@ -10,12 +10,25 @@ public class SegmentInitializationContextImpl implements SegmentInitializationCo
     private final Path segmentPath;
     private final int currentSize;
     private final SegmentIndex index;
+    private final boolean readOnly;
+    private final int segmentSizeInBytes;
 
-    public SegmentInitializationContextImpl(String segmentName, Path segmentPath, int currentSize, SegmentIndex index) {
+    public SegmentInitializationContextImpl(String segmentName, Path segmentPath, int currentSize, SegmentIndex index, boolean readOnly) {
         this.segmentName = segmentName;
         this.segmentPath = segmentPath;
         this.currentSize = currentSize;
         this.index = index;
+        this.readOnly = readOnly;
+        this.segmentSizeInBytes = 100_000;
+    }
+
+    public SegmentInitializationContextImpl(String segmentName, Path segmentPath, int currentSize, SegmentIndex index, boolean readOnly, int segmentSizeInBytes) {
+        this.segmentName = segmentName;
+        this.segmentPath = segmentPath;
+        this.currentSize = currentSize;
+        this.index = index;
+        this.readOnly = readOnly;
+        this.segmentSizeInBytes = segmentSizeInBytes;
     }
 
     @Override
@@ -36,5 +49,15 @@ public class SegmentInitializationContextImpl implements SegmentInitializationCo
     @Override
     public int getCurrentSize() {
         return currentSize;
+    }
+
+    @Override
+    public boolean getReadOnly() {
+        return readOnly;
+    }
+
+    @Override
+    public int getSegmentSizeInBytes() {
+        return segmentSizeInBytes;
     }
 }
