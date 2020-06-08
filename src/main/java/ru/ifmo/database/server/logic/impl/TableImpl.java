@@ -6,6 +6,7 @@ import ru.ifmo.database.server.initialization.TableInitializationContext;
 import ru.ifmo.database.server.logic.Segment;
 import ru.ifmo.database.server.logic.Table;
 
+import java.io.File;
 import java.nio.file.Path;
 
 /**
@@ -18,9 +19,18 @@ import java.nio.file.Path;
  * и хранящую файлы-сегменты данной таблицы
  */
 public class TableImpl implements Table {
+    private final String name;
+    private final TableIndex tableIndex;
+    private final Path
 
     static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
+        try {
+            new File(pathToDatabaseRoot + tableName).mkdir();
+        }
+        catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+
     }
 
     public static Table initializeFromContext(TableInitializationContext context) {

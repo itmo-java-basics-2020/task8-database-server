@@ -3,10 +3,14 @@ package ru.ifmo.database.server.logic.impl;
 import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.index.impl.SegmentIndex;
 import ru.ifmo.database.server.initialization.SegmentInitializationContext;
+import ru.ifmo.database.server.initialization.impl.SegmentInitializationContextImpl;
 import ru.ifmo.database.server.logic.Segment;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Сегмент - append-only файл, хранящий пары ключ-значение, разделенные специальным символом.
@@ -16,13 +20,30 @@ import java.nio.file.Path;
  * - является неизменяемым после появления более нового сегмента
  */
 public class SegmentImpl implements Segment {
+    private final String segmentName;
+    private final Path segmentPath;
+    private final SegmentIndex index;
 
-    public SegmentImpl(SegmentInitializationContext context) {
-        throw new UnsupportedOperationException(); // todo implement
+    private int currentSize;
+
+    private SegmentImpl(SegmentInitializationContext context) {
+        this.segmentName = context.getSegmentName();
+        this.segmentPath = context.getSegmentPath();
+        this.currentSize = context.getCurrentSize();
+        this.index = context.getIndex();
     }
 
     static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
+        Path createdSegmentPath;
+        try {
+            new File(tableRootPath.toString(), segmentName).createNewFile();
+            createdSegmentPath = Paths.get(tableRootPath + segmentName);
+        }
+        catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+        SegmentInitializationContext segmentContext = new SegmentInitializationContextImpl(segmentName, createdSegmentPath, 0, new SegmentIndex());
+        return new SegmentImpl(segmentContext);
     }
 
     static String createSegmentName(String tableName) {
@@ -31,12 +52,12 @@ public class SegmentImpl implements Segment {
 
     @Override
     public String getName() {
-        throw new UnsupportedOperationException(); // todo implement
+        return segmentName;
     }
 
     @Override
     public boolean write(String objectKey, String objectValue) throws IOException, DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
+        throw new UnsupportedOperationException()//todo
     }
 
     @Override
