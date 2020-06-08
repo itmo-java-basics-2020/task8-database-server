@@ -170,6 +170,75 @@ public class DatabaseServerTest {
         }
     }
 
+    //long keys and values about 1000 symbols
+    @Test
+    public void checkStorageCorrectnessLong() throws IOException, DatabaseException {
+        Map<String, String> mapStorage = new ConcurrentHashMap<>();
+        Initializer initializer = new DatabaseServerInitializer(
+                new DatabaseInitializer(new TableInitializer(new SegmentInitializer())));
+        DatabaseServer server = new DatabaseServer(new ExecutionEnvironmentImpl(), initializer);
+
+        List<String> dbNames = Stream.generate(() -> random.nextInt(100_000))
+                .map(i -> "db_" + i)
+                .limit(10)
+                .collect(Collectors.toList());
+        List<String> tablesNames = Stream.generate(() -> random.nextInt(100_000))
+                .map(i -> "table_" + i)
+                .limit(10)
+                .collect(Collectors.toList());
+        dbNames.forEach(dbName -> {
+            server.executeNextCommand("CREATE_DATABASE " + dbName);
+            tablesNames.forEach(tableName ->
+                    server.executeNextCommand("CREATE_TABLE " + dbName + " " + tableName));
+        });
+
+        List<NoteInfo> data = Stream.generate(() -> random.nextInt(100_000_000))
+                .map(i -> new NoteInfo(
+                        dbNames.get(random.nextInt(10)),
+                        tablesNames.get(random.nextInt(10)),
+                        "key_" + i + generateLongString(1_000),
+                        "value_" + i + generateLongString(1_000)))
+                .limit(1000)
+                .collect(Collectors.toList());
+
+        Collections.shuffle(data);
+
+        for (int i = 0; i < 3_000; i++) {
+            DatabaseCommands commandType = random.nextDouble() > 0.9 ? DatabaseCommands.UPDATE_KEY : DatabaseCommands.READ_KEY;
+
+            NoteInfo note = data.get(random.nextInt(data.size()));
+
+            switch (commandType) {
+                case UPDATE_KEY: {
+                    String value = note.getValue() + "_" + i;
+                    note.setValue(value);
+
+                    server.executeNextCommand(
+                            "UPDATE_KEY " + note.getDb() + " " + note.getTable() +
+                                    " " + note.getKey() + " " + value);
+                    mapStorage.put(note.getDb() + note.getTable() + note.getKey(), value);
+
+                    break;
+                }
+                case READ_KEY: {
+                    if (!mapStorage.containsKey(note.getDb() + note.getTable() + note.getKey()))
+                        break;
+
+                    DatabaseCommandResult commandResult = server.executeNextCommand(
+                            "READ_KEY " + note.getDb() + " " + note.getTable() + " " + note.getKey());
+
+                    if (commandResult.isSuccess()) {
+                        Assert.assertEquals(mapStorage.get(note.getDb() + note.getTable() + note.getKey()), commandResult.getResult().get());
+                    }
+                    else {
+                        Assert.fail(commandResult.getErrorMessage() + " " + note.getKey());
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
     @Test
     public void test_initializationOneOne() {
         testInitialization(1, 1, 100_000);
@@ -235,6 +304,18 @@ public class DatabaseServerTest {
                         server2.executeNextCommand("READ_KEY " + note.getDb() + " " + note.getTable() + " " + note.getKey())
                                 .getResult().get(),
                         note.getValue()));
+    }
+
+    public String generateLongString(int length) {
+        int leftLimit = 48; // numeral '0'
+        int rightLimit = 122; // letter 'z'
+        Random random = new Random();
+
+        return random.ints(leftLimit, rightLimit + 1)
+                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+                .limit(length)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
 
     @Getter
