@@ -84,16 +84,16 @@ public class DatabaseServerTest {
                     break;
                 }
                 case READ_KEY: {
-                    if (!mapStorage.containsKey(key))
+                    if (!mapStorage.containsKey(key)) {
                         break;
+                    }
 
                     DatabaseCommandResult commandResult = databaseServer.executeNextCommand(
                             "READ_KEY " + dbName + " " + tableName + " " + key);
 
                     if (commandResult.isSuccess()) {
                         Assert.assertEquals(mapStorage.get(key), commandResult.getResult().get());
-                    }
-                    else {
+                    } else {
                         Assert.fail(commandResult.getErrorMessage() + " " + key);
                     }
                     break;
@@ -104,70 +104,15 @@ public class DatabaseServerTest {
 
     @Test
     public void checkStorageCorrectnessManyMany() throws IOException, DatabaseException {
-        Map<String, String> mapStorage = new ConcurrentHashMap<>();
         Initializer initializer = new DatabaseServerInitializer(
                 new DatabaseInitializer(new TableInitializer(new SegmentInitializer())));
         DatabaseServer server = new DatabaseServer(new ExecutionEnvironmentImpl(), initializer);
 
-        List<String> dbNames = Stream.generate(() -> random.nextInt(100_000))
-                .map(i -> "db_" + i)
-                .limit(10)
-                .collect(Collectors.toList());
-        List<String> tablesNames = Stream.generate(() -> random.nextInt(100_000))
-                .map(i -> "table_" + i)
-                .limit(10)
-                .collect(Collectors.toList());
-        dbNames.forEach(dbName -> {
-            server.executeNextCommand("CREATE_DATABASE " + dbName);
-            tablesNames.forEach(tableName ->
-                    server.executeNextCommand("CREATE_TABLE " + dbName + " " + tableName));
-        });
-
-        List<NoteInfo> data = Stream.generate(() -> random.nextInt(100_000_000))
-                .map(i -> new NoteInfo(
-                        dbNames.get(random.nextInt(10)),
-                        tablesNames.get(random.nextInt(10)),
-                        "key_" + i,
-                        "value_" + i))
-                .limit(100_000)
-                .collect(Collectors.toList());
+        List<RowInfo> data = createData(server, 10, 10, 100_000, false);
 
         Collections.shuffle(data);
 
-        for (int i = 0; i < 300_000; i++) {
-            DatabaseCommands commandType = random.nextDouble() > 0.9 ? DatabaseCommands.UPDATE_KEY : DatabaseCommands.READ_KEY;
-
-            NoteInfo note = data.get(random.nextInt(data.size()));
-
-            switch (commandType) {
-                case UPDATE_KEY: {
-                    String value = note.getValue() + "_" + i;
-                    note.setValue(value);
-
-                    server.executeNextCommand(
-                            "UPDATE_KEY " + note.getDb() + " " + note.getTable() +
-                                    " " + note.getKey() + " " + value);
-                    mapStorage.put(note.getDb() + note.getTable() + note.getKey(), value);
-
-                    break;
-                }
-                case READ_KEY: {
-                    if (!mapStorage.containsKey(note.getDb() + note.getTable() + note.getKey()))
-                        break;
-
-                    DatabaseCommandResult commandResult = server.executeNextCommand(
-                            "READ_KEY " + note.getDb() + " " + note.getTable() + " " + note.getKey());
-
-                    if (commandResult.isSuccess()) {
-                        Assert.assertEquals(mapStorage.get(note.getDb() + note.getTable() + note.getKey()), commandResult.getResult().get());
-                    }
-                    else {
-                        Assert.fail(commandResult.getErrorMessage() + " " + note.getKey());
-                    }
-                    break;
-                }
-            }
-        }
+        updateReadCheck(data, server, 300_000);
     }
 
     //long keys and values about 1000 symbols
@@ -178,65 +123,11 @@ public class DatabaseServerTest {
                 new DatabaseInitializer(new TableInitializer(new SegmentInitializer())));
         DatabaseServer server = new DatabaseServer(new ExecutionEnvironmentImpl(), initializer);
 
-        List<String> dbNames = Stream.generate(() -> random.nextInt(100_000))
-                .map(i -> "db_" + i)
-                .limit(10)
-                .collect(Collectors.toList());
-        List<String> tablesNames = Stream.generate(() -> random.nextInt(100_000))
-                .map(i -> "table_" + i)
-                .limit(10)
-                .collect(Collectors.toList());
-        dbNames.forEach(dbName -> {
-            server.executeNextCommand("CREATE_DATABASE " + dbName);
-            tablesNames.forEach(tableName ->
-                    server.executeNextCommand("CREATE_TABLE " + dbName + " " + tableName));
-        });
-
-        List<NoteInfo> data = Stream.generate(() -> random.nextInt(100_000_000))
-                .map(i -> new NoteInfo(
-                        dbNames.get(random.nextInt(10)),
-                        tablesNames.get(random.nextInt(10)),
-                        "key_" + i + generateLongString(1_000),
-                        "value_" + i + generateLongString(1_000)))
-                .limit(1000)
-                .collect(Collectors.toList());
+        List<RowInfo> data = createData(server, 10, 10, 1000, true);
 
         Collections.shuffle(data);
 
-        for (int i = 0; i < 3_000; i++) {
-            DatabaseCommands commandType = random.nextDouble() > 0.9 ? DatabaseCommands.UPDATE_KEY : DatabaseCommands.READ_KEY;
-
-            NoteInfo note = data.get(random.nextInt(data.size()));
-
-            switch (commandType) {
-                case UPDATE_KEY: {
-                    String value = note.getValue() + "_" + i;
-                    note.setValue(value);
-
-                    server.executeNextCommand(
-                            "UPDATE_KEY " + note.getDb() + " " + note.getTable() +
-                                    " " + note.getKey() + " " + value);
-                    mapStorage.put(note.getDb() + note.getTable() + note.getKey(), value);
-
-                    break;
-                }
-                case READ_KEY: {
-                    if (!mapStorage.containsKey(note.getDb() + note.getTable() + note.getKey()))
-                        break;
-
-                    DatabaseCommandResult commandResult = server.executeNextCommand(
-                            "READ_KEY " + note.getDb() + " " + note.getTable() + " " + note.getKey());
-
-                    if (commandResult.isSuccess()) {
-                        Assert.assertEquals(mapStorage.get(note.getDb() + note.getTable() + note.getKey()), commandResult.getResult().get());
-                    }
-                    else {
-                        Assert.fail(commandResult.getErrorMessage() + " " + note.getKey());
-                    }
-                    break;
-                }
-            }
-        }
+        updateReadCheck(data, server, 3_000);
     }
 
     @Test
@@ -265,11 +156,27 @@ public class DatabaseServerTest {
     }
 
     @SneakyThrows
-    private void testInitialization(int countDb, int countTables, int countNotes) {
+    private void testInitialization(int countDb, int countTables, int countRows) {
         Initializer initializer = new DatabaseServerInitializer(
                 new DatabaseInitializer(new TableInitializer(new SegmentInitializer())));
         DatabaseServer server = new DatabaseServer(new ExecutionEnvironmentImpl(), initializer);
 
+        List<RowInfo> data = createData(server, countDb, countTables, countRows, false);
+
+        data.forEach(kv -> server.executeNextCommand(
+                "UPDATE_KEY " + kv.getDb() + " " + kv.getTable() + " " + kv.getKey() + " " + kv.getValue()));
+
+        DatabaseServer server2 = new DatabaseServer(new ExecutionEnvironmentImpl(), initializer);
+
+        data.forEach(row ->
+                Assert.assertEquals(
+                        server2.executeNextCommand("READ_KEY " + row.getDb() + " " + row.getTable() + " " + row.getKey())
+                                .getResult().get(),
+                        row.getValue()));
+    }
+
+    public List<RowInfo> createData(DatabaseServer server, int countDb, int countTables,
+                                    int countRows, boolean longKeyValue) {
         List<String> dbNames = Stream.generate(() -> random.nextInt(100_000))
                 .map(i -> "db_" + i)
                 .limit(countDb)
@@ -281,29 +188,56 @@ public class DatabaseServerTest {
         dbNames.forEach(dbName -> {
             server.executeNextCommand("CREATE_DATABASE " + dbName);
             tablesNames.forEach(tableName ->
-                server.executeNextCommand("CREATE_TABLE " + dbName + " " + tableName));
+                    server.executeNextCommand("CREATE_TABLE " + dbName + " " + tableName));
         });
 
-        List<NoteInfo> data = Stream.generate(() -> random.nextInt(100_000_000))
-                .map(i -> new NoteInfo(
+        return Stream.generate(() -> random.nextInt(100_000_000))
+                .map(i -> new RowInfo(
                         dbNames.get(random.nextInt(countDb)),
                         tablesNames.get(random.nextInt(countTables)),
-                        "key_" + i,
-                        "value_" + i))
-                .limit(countNotes)
+                        "key_" + i + (longKeyValue ? generateLongString(1_000) : ""),
+                        "value_" + i + (longKeyValue ? generateLongString(1_000) : "")))
+                .limit(countRows)
                 .collect(Collectors.toList());
+    }
 
-        data.forEach(kv -> server.executeNextCommand(
-                "UPDATE_KEY " + kv.getDb() + " " + kv.getTable() + " " + kv.getKey() + " " + kv.getValue()));
+    public void updateReadCheck(List<RowInfo> data, DatabaseServer server, int countOperations) {
+        Map<String, String> mapStorage = new ConcurrentHashMap<>();
 
+        for (int i = 0; i < countOperations; i++) {
+            DatabaseCommands commandType = random.nextDouble() > 0.9 ? DatabaseCommands.UPDATE_KEY : DatabaseCommands.READ_KEY;
 
-        DatabaseServer server2 = new DatabaseServer(new ExecutionEnvironmentImpl(), initializer);
+            RowInfo row = data.get(random.nextInt(data.size()));
 
-        data.forEach(note ->
-                Assert.assertEquals(
-                        server2.executeNextCommand("READ_KEY " + note.getDb() + " " + note.getTable() + " " + note.getKey())
-                                .getResult().get(),
-                        note.getValue()));
+            switch (commandType) {
+                case UPDATE_KEY: {
+                    String value = row.getValue() + "_" + i;
+                    row.setValue(value);
+
+                    server.executeNextCommand(
+                            "UPDATE_KEY " + row.getDb() + " " + row.getTable() +
+                                    " " + row.getKey() + " " + value);
+                    mapStorage.put(row.getDb() + row.getTable() + row.getKey(), value);
+
+                    break;
+                }
+                case READ_KEY: {
+                    if (!mapStorage.containsKey(row.getDb() + row.getTable() + row.getKey())) {
+                        break;
+                    }
+
+                    DatabaseCommandResult commandResult = server.executeNextCommand(
+                            "READ_KEY " + row.getDb() + " " + row.getTable() + " " + row.getKey());
+
+                    if (commandResult.isSuccess()) {
+                        Assert.assertEquals(mapStorage.get(row.getDb() + row.getTable() + row.getKey()), commandResult.getResult().get());
+                    } else {
+                        Assert.fail(commandResult.getErrorMessage() + " " + row.getKey());
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     public String generateLongString(int length) {
@@ -320,14 +254,14 @@ public class DatabaseServerTest {
 
     @Getter
     @Setter
-    static class NoteInfo {
+    static class RowInfo {
 
         private String db;
         private String table;
         private String key;
         private String value;
 
-        NoteInfo(String db, String table, String key, String value) {
+        RowInfo(String db, String table, String key, String value) {
             this.db = db;
             this.table = table;
             this.key = key;

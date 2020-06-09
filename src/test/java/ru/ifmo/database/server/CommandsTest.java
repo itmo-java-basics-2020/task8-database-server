@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 import static ru.ifmo.database.server.console.DatabaseCommandResult.DatabaseCommandStatus.FAILED;
 import static ru.ifmo.database.server.console.DatabaseCommandResult.DatabaseCommandStatus.SUCCESS;
 
+@RunWith(MockitoJUnitRunner.class)
 public class CommandsTest {
 
     private static final String DB_NAME = "db_1";
@@ -61,7 +62,11 @@ public class CommandsTest {
     public DatabaseServer server;
 
     public CommandsTest() throws IOException, DatabaseException {
-        MockitoAnnotations.initMocks(this);
+    }
+
+    @Before
+    @SneakyThrows
+    public void initServer() {
         when(env.getWorkingPath()).thenReturn(path);
         server = new DatabaseServer(env,
                 new DatabaseServerInitializer(new DatabaseInitializer(new TableInitializer(new SegmentInitializer()))));
