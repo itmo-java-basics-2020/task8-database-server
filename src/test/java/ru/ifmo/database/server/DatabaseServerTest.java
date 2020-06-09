@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 @RunWith(JUnit4.class)
 public class DatabaseServerTest {
@@ -61,9 +61,8 @@ public class DatabaseServerTest {
         Arrays.stream(initCommands)
                 .forEach(databaseServer::executeNextCommand);
 
-        List<String> allowedKeys = Stream.generate(() -> random.nextInt(100_000))
-                .map(i -> "test_key_" + i)
-                .limit(10_000)
+        List<String> allowedKeys = IntStream.range(0, 10_000)
+                .mapToObj(i -> "test_key_" + i)
                 .collect(Collectors.toList());
 
         Collections.shuffle(allowedKeys);
@@ -177,13 +176,11 @@ public class DatabaseServerTest {
 
     public List<RowInfo> createData(DatabaseServer server, int countDb, int countTables,
                                     int countRows, boolean longKeyValue) {
-        List<String> dbNames = Stream.generate(() -> random.nextInt(100_000))
-                .map(i -> "db_" + i)
-                .limit(countDb)
+        List<String> dbNames = IntStream.range(0, countDb)
+                .mapToObj(i -> "db_" + i)
                 .collect(Collectors.toList());
-        List<String> tablesNames = Stream.generate(() -> random.nextInt(100_000))
-                .map(i -> "table_" + i)
-                .limit(countTables)
+        List<String> tablesNames = IntStream.range(0, countTables)
+                .mapToObj(i -> "table_" + i)
                 .collect(Collectors.toList());
         dbNames.forEach(dbName -> {
             server.executeNextCommand("CREATE_DATABASE " + dbName);
@@ -191,13 +188,12 @@ public class DatabaseServerTest {
                     server.executeNextCommand("CREATE_TABLE " + dbName + " " + tableName));
         });
 
-        return Stream.generate(() -> random.nextInt(100_000_000))
-                .map(i -> new RowInfo(
+        return IntStream.range(0, countRows)
+                .mapToObj(i -> new RowInfo(
                         dbNames.get(random.nextInt(countDb)),
                         tablesNames.get(random.nextInt(countTables)),
                         "key_" + i + (longKeyValue ? generateLongString(1_000) : ""),
                         "value_" + i + (longKeyValue ? generateLongString(1_000) : "")))
-                .limit(countRows)
                 .collect(Collectors.toList());
     }
 
