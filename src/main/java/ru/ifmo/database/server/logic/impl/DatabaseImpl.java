@@ -74,11 +74,8 @@ public class DatabaseImpl implements Database {
     @Override
     public void write(String tableName, String objectKey, String objectValue) throws DatabaseException {
         Table table = tableMap.get(tableName);
-        try {
-            table.write(objectKey, objectValue);
-        } catch (IOException e) {
-            throw new DatabaseException(e);
-        }
+
+        table.write(objectKey, objectValue);
     }
 
     @Override

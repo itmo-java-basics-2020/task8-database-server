@@ -34,7 +34,7 @@ public class SegmentImpl implements Segment {
     private boolean readOnly;
     private int currentSize;
 
-    private SegmentImpl(SegmentInitializationContext context) {
+    public SegmentImpl(SegmentInitializationContext context) {
         this.segmentName = context.getSegmentName();
         this.segmentPath = context.getSegmentPath();
         this.currentSize = context.getCurrentSize();

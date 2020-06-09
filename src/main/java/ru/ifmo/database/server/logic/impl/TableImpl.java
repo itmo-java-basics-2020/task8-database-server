@@ -65,11 +65,11 @@ public class TableImpl implements Table {
     }
 
     static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
-        return new TableImpl(tableName, pathToDatabaseRoot, tableIndex);
+        return new CachingTable(new TableImpl(tableName, pathToDatabaseRoot, tableIndex));
     }
 
     static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex, int segmentSizeInBytes) throws DatabaseException {
-        return new TableImpl(tableName, pathToDatabaseRoot, tableIndex, segmentSizeInBytes);
+        return new CachingTable(new TableImpl(tableName, pathToDatabaseRoot, tableIndex, segmentSizeInBytes));
     }
 
     public static Table initializeFromContext(TableInitializationContext context) {

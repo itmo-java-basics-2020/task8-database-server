@@ -10,23 +10,29 @@ import ru.ifmo.database.server.initialization.Initializer;
 import org.apache.commons.lang3.StringUtils;
 import ru.ifmo.database.server.initialization.impl.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DatabaseServer {
+    private final ExecutionEnvironment executionEnvironment;
 
     private static ExecutorService executor = Executors.newSingleThreadExecutor();
 
 
     public DatabaseServer(ExecutionEnvironment env, Initializer initializer) throws IOException, DatabaseException {
-        // todo implement
+        this.executionEnvironment = env;
 
-        InitializationContextImpl initializationContext = InitializationContextImpl.builder() // example using lombok @Builder
-                .executionEnvironment(env)
-                .build();
+        File dir = env.getWorkingPath().toFile();
 
+        InitializationContextImpl init = new InitializationContextImpl(executionEnvironment,
+                null,
+                null,
+                null);
+
+        initializer.perform(init);
     }
 
     public static void main(String[] args) throws IOException, DatabaseException {
