@@ -7,33 +7,40 @@ import ru.ifmo.database.server.logic.Segment;
 import java.nio.file.Path;
 
 public class TableInitializationContextImpl implements TableInitializationContext {
+    private final String tableName;
+    private final Path databasePath;
+    private final TableIndex tableIndex;
+    private Segment currentSegment;
 
     public TableInitializationContextImpl(String tableName, Path databasePath, TableIndex tableIndex) {
-        throw new UnsupportedOperationException(); // todo implement
+        this.tableName = tableName;
+        this.databasePath = databasePath;
+        this.tableIndex = tableIndex;
+        this.currentSegment = null;
     }
 
     @Override
     public String getTableName() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.tableName;
     }
 
     @Override
     public Path getTablePath() {
-        throw new UnsupportedOperationException(); // todo implement
+        return Path.of(this.databasePath.toString() + "/" + this.tableName);
     }
 
     @Override
     public TableIndex getTableIndex() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.tableIndex;
     }
 
     @Override
     public Segment getCurrentSegment() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.currentSegment;
     }
 
     @Override
     public void updateCurrentSegment(Segment segment) {
-        throw new UnsupportedOperationException(); // todo implement
+        this.currentSegment = segment;
     }
 }

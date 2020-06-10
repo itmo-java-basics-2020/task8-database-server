@@ -20,7 +20,7 @@ public interface Segment {
     // exception is questionable
     boolean write(String objectKey, String objectValue) throws IOException, DatabaseException;
 
-    String read(String objectKey) throws IOException;
+    String read(String objectKey) throws IOException, DatabaseException;
 
     boolean isReadOnly();
 }
