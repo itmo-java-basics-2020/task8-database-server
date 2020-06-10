@@ -10,6 +10,15 @@ public class DatabaseOutputStream extends DataOutputStream {
     }
 
     int write(DatabaseStoringUnit storingUnit) throws IOException {
-        throw new UnsupportedOperationException(); // todo implement
+        writeInt(storingUnit.getKeySize());
+        for (byte b : storingUnit.getKey()) {
+            writeByte(b);
+        }
+
+        writeInt(storingUnit.getValueSize());
+        for (byte b : storingUnit.getValue()) {
+            writeByte(b);
+        }
+        return (storingUnit.getKeySize() + storingUnit.getValueSize());
     }
 }
