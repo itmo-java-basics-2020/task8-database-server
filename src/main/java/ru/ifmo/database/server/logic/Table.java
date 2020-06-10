@@ -2,6 +2,8 @@ package ru.ifmo.database.server.logic;
 
 import ru.ifmo.database.server.exception.DatabaseException;
 
+import java.io.IOException;
+
 /**
  * Таблица - логическая сущность, представляющая собой набор файлов-сегментов, которые объединены одним
  * именем и используются для хранения однотипных данных (данных, представляющих собой одну и ту же сущность,

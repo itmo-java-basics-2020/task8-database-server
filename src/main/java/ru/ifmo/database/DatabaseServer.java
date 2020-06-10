@@ -10,23 +10,32 @@ import ru.ifmo.database.server.initialization.Initializer;
 import org.apache.commons.lang3.StringUtils;
 import ru.ifmo.database.server.initialization.impl.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DatabaseServer {
+    private final ExecutionEnvironment executionEnvironment;
 
     private static ExecutorService executor = Executors.newSingleThreadExecutor();
 
 
     public DatabaseServer(ExecutionEnvironment env, Initializer initializer) throws IOException, DatabaseException {
-        // todo implement
+        this.executionEnvironment = env;
 
-        InitializationContextImpl initializationContext = InitializationContextImpl.builder() // example using lombok @Builder
-                .executionEnvironment(env)
-                .build();
+        File dir = env.getWorkingPath().toFile();
 
+        if (dir.isDirectory()) {
+            InitializationContextImpl init = InitializationContextImpl.builder()
+                    .executionEnvironment(env)
+                    .build();
+
+            initializer.perform(init);
+        } else {
+            dir.mkdir();
+        }
     }
 
     public static void main(String[] args) throws IOException, DatabaseException {
@@ -37,11 +46,31 @@ public class DatabaseServer {
     }
 
     public DatabaseCommandResult executeNextCommand(String commandText) {
-        throw new UnsupportedOperationException(); // todo implement
+        if (commandText == null) {
+            return DatabaseCommandResult.error("Null command");
+        }
 
+        String[] commands = commandText.split(" ");
+        if (commands.length == 0) {
+            return DatabaseCommandResult.error("Empty command");
+        }
+
+        try {
+            return DatabaseCommands.valueOf(commands[0]).getCommand(executionEnvironment, commands).execute();
+        } catch (DatabaseException e) {
+            return DatabaseCommandResult.error(e.getMessage());
+        }
     }
 
     public DatabaseCommandResult executeNextCommand(DatabaseCommand command) {
-        throw new UnsupportedOperationException(); // todo implement
+        if (command == null) {
+            return DatabaseCommandResult.error("Null command");
+        }
+
+        try {
+            return command.execute();
+        } catch (DatabaseException e) {
+            return DatabaseCommandResult.error(e.getMessage());
+        }
     }
 }
