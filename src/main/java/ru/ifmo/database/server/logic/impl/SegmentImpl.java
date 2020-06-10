@@ -7,9 +7,11 @@ import ru.ifmo.database.server.index.impl.SegmentIndexInfoImpl;
 import ru.ifmo.database.server.initialization.SegmentInitializationContext;
 import ru.ifmo.database.server.logic.Segment;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Optional;
 
 

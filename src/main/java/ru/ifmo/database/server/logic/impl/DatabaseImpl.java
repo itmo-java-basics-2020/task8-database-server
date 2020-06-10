@@ -59,14 +59,15 @@ public class DatabaseImpl implements Database {
         if (tables.containsKey(tableName)) {
             throw new DatabaseException("table already exist");
         }
-        Table t = TableImpl.create(tableName, databasePath);
+        Table tt = TableImpl.create(tableName, databasePath);
+        Table t = new CachingTable(tt);
         tables.put(tableName, t);
     }
 
 
     @Override
     public void createTableIfNotExists(String tableName, int segmentSizeInBytes) throws DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement (not necessary)
+        throw new UnsupportedOperationException();
     }
 
     @Override

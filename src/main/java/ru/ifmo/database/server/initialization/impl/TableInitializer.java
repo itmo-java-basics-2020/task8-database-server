@@ -6,6 +6,8 @@ import ru.ifmo.database.server.initialization.InitializationContext;
 import ru.ifmo.database.server.initialization.Initializer;
 import ru.ifmo.database.server.initialization.SegmentInitializationContext;
 import ru.ifmo.database.server.logic.Database;
+import ru.ifmo.database.server.logic.Table;
+import ru.ifmo.database.server.logic.impl.CachingTable;
 import ru.ifmo.database.server.logic.impl.DatabaseImpl;
 import ru.ifmo.database.server.logic.impl.TableImpl;
 
@@ -47,7 +49,8 @@ public class TableInitializer implements Initializer {
             contexts.add(initializationContext);
             segmentInitializer.perform(initializationContext);
         }
-        context.currentDbContext().addTable(TableImpl.initializeFromContext(context.currentTableContext()));
+        Table cachingTable = new CachingTable(TableImpl.initializeFromContext(context.currentTableContext()));
+        context.currentDbContext().addTable(cachingTable);
 
     }
 }
