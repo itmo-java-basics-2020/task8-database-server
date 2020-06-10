@@ -2,32 +2,44 @@ package ru.ifmo.database.server.initialization.impl;
 
 import ru.ifmo.database.server.index.impl.SegmentIndex;
 import ru.ifmo.database.server.initialization.SegmentInitializationContext;
+import ru.ifmo.database.server.logic.Segment;
 
 import java.nio.file.Path;
 
 public class SegmentInitializationContextImpl implements SegmentInitializationContext {
+    private final String segmentName;
+    private final Path segmentPath;
+    private final SegmentIndex segmentIndex;
+    private final long currentSize;
 
-    private SegmentInitializationContextImpl(String segmentName, Path segmentPath, int currentSize, SegmentIndex index) {
-        throw new UnsupportedOperationException(); // todo implement
+
+    public SegmentInitializationContextImpl(String segmentName, Path segmentPath, SegmentIndex segmentIndex, long currentSize) {
+        this.segmentName = segmentName;
+        this.segmentPath = segmentPath;
+        this.segmentIndex = segmentIndex;
+        this.currentSize = currentSize;
     }
+
 
     @Override
     public String getSegmentName() {
-        throw new UnsupportedOperationException(); // todo implement
+        return segmentName;
     }
 
     @Override
     public Path getSegmentPath() {
-        throw new UnsupportedOperationException(); // todo implement
+        return segmentPath;
     }
 
     @Override
     public SegmentIndex getIndex() {
-        throw new UnsupportedOperationException(); // todo implement
+        return segmentIndex;
     }
 
     @Override
-    public int getCurrentSize() {
-        throw new UnsupportedOperationException(); // todo implement
+    public long getCurrentSize() {
+        return currentSize;
     }
+
+
 }

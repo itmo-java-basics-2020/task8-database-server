@@ -1,6 +1,7 @@
 package ru.ifmo.database.server.logic;
 
-import ru.ifmo.database.server.exception.DatabaseException;
+import ru.ifmo.database.server.logic.impl.SegmentReadResult;
+import ru.ifmo.database.server.logic.impl.SegmentWriteResult;
 
 import java.io.IOException;
 
@@ -18,9 +19,26 @@ public interface Segment {
     // todo sukhoa in future may return something like SegmentWriteResult .. with report and error details?
     // for new returns false if cannot allocate requested capacity
     // exception is questionable
-    boolean write(String objectKey, String objectValue) throws IOException, DatabaseException;
+    SegmentWriteResult write(String objectKey, String objectValue);
 
-    String read(String objectKey) throws IOException;
+    /**
+     * @param objectKey
+     * @param objectValue
+     * @param notPrintedLength - length of not printed part of DbUnit in bytes
+     * @return SegmentWriteResult
+     */
+    SegmentWriteResult write(String objectKey, String objectValue, int notPrintedLength);
+
+    SegmentReadResult read(String objectKey) throws IOException;
+
+    /**
+     *
+     * @param objectKey
+     * @param previousPart - part of DbUnit that was read in previous segment
+     * @return
+     * @throws IOException
+     */
+    SegmentReadResult read(String objectKey, SegmentReadResult previousPart) throws IOException;
 
     boolean isReadOnly();
 }
