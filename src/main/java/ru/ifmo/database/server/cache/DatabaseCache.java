@@ -1,14 +1,34 @@
 package ru.ifmo.database.server.cache;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class DatabaseCache implements Cache {
+    private static final int DEFAULT_CAPACITY = 1000;
+    private static final float DEFAULT_LOAD_FACTOR = 1f;
+
+    private final Map<String, String> cache;
+
+    public DatabaseCache(Integer capacity, Float loadFactor) {
+        this.cache = new LinkedHashMap<>(capacity, loadFactor, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+                return size() > capacity;
+            }
+        };
+    }
+
+    public DatabaseCache() {
+        this(DEFAULT_CAPACITY, DEFAULT_LOAD_FACTOR);
+    }
 
     @Override
     public String get(String key) {
-        throw new UnsupportedOperationException(); // todo implement
+        return cache.get(key);
     }
 
     @Override
     public void set(String key, String value) {
-        throw new UnsupportedOperationException(); // todo implement
+        cache.put(key, value);
     }
 }

@@ -4,14 +4,14 @@ import ru.ifmo.database.server.index.SegmentIndexInfo;
 
 public class SegmentIndexInfoImpl implements SegmentIndexInfo {
 
-    private final long offset;
+    private final Integer offset;
 
-    public SegmentIndexInfoImpl(long offset) {
+    public SegmentIndexInfoImpl(Integer offset) {
         this.offset = offset;
     }
 
     @Override
-    public long getOffset() {
-        throw new UnsupportedOperationException(); // todo implement
+    public Integer getOffset() {
+        return offset;
     }
 }
