@@ -1,8 +1,11 @@
 package ru.ifmo.database.server.logic.impl;
 
+import ru.ifmo.database.server.console.ExecutionEnvironment;
+import ru.ifmo.database.server.console.impl.CreateDatabaseCommand;
 import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.initialization.DatabaseInitializationContext;
 import ru.ifmo.database.server.logic.Database;
+import ru.ifmo.database.server.logic.DatabaseFactory;
 import ru.ifmo.database.server.logic.Table;
 
 import java.nio.file.Path;
@@ -12,8 +15,15 @@ import java.util.Objects;
 
 public class DatabaseImpl implements Database {
 
-    public static Database create(String dbName, Path databaseRoot) throws DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
+    private Path databaseRoot;
+    private String dbName;
+    TableImpl Table = new TableImpl();
+
+
+    public void create(String dbName, Path databaseRoot) throws DatabaseException {
+        this.databaseRoot = databaseRoot;
+        this.dbName = dbName;
+
     }
 
     public static Database initializeFromContext(DatabaseInitializationContext context) {
@@ -22,12 +32,12 @@ public class DatabaseImpl implements Database {
 
     @Override
     public String getName() {
-        throw new UnsupportedOperationException(); // todo implement
+        return dbName;
     }
 
     @Override
     public void createTableIfNotExists(String tableName) throws DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
+        Table.create(tableName, this.databaseRoot, null);
     }
 
     @Override
@@ -37,11 +47,11 @@ public class DatabaseImpl implements Database {
 
     @Override
     public void write(String tableName, String objectKey, String objectValue) throws DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
+        this.Table.write(objectKey, objectValue);
     }
 
     @Override
     public String read(String tableName, String objectKey) throws DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.Table.read(objectKey);
     }
 }

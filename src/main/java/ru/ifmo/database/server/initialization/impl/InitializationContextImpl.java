@@ -17,6 +17,9 @@ public class InitializationContextImpl implements InitializationContext {
         throw new UnsupportedOperationException(); // todo implement
     }
 
+    public static InitializationContext builder() {
+    }
+
     @Override
     public ExecutionEnvironment executionEnvironment() {
         throw new UnsupportedOperationException(); // todo implement

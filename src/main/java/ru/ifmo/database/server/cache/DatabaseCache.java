@@ -1,14 +1,23 @@
 package ru.ifmo.database.server.cache;
 
+
+import java.util.Hashtable;
+
 public class DatabaseCache implements Cache {
+    private Hashtable<String, String> table = new Hashtable();
+
+    public DatabaseCache() {
+
+    }
 
     @Override
     public String get(String key) {
-        throw new UnsupportedOperationException(); // todo implement
+        return table.get(key);
+
     }
 
     @Override
     public void set(String key, String value) {
-        throw new UnsupportedOperationException(); // todo implement
+        table.put(key, value);
     }
 }
