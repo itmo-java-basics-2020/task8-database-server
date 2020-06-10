@@ -18,17 +18,27 @@ public class TableInitializer implements Initializer {
 
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
+        if (context.currentTableContext() == null) {
+            throw new DatabaseException("Context Table is null");
+        }
         //getting table dir
         File dir = context.currentTableContext().getTablePath().toFile();
 
+        if (dir.listFiles() == null) {
+            return;
+        }
         //Search for all segments
         File[] segments = dir.listFiles();
 
         for (File seg : segments) {
-            InitializationContext init = new InitializationContextImpl(context.executionEnvironment(),
-                    context.currentDbContext(),
-                    context.currentTableContext(),
-                    new SegmentInitializationContextImpl(seg.getName(), seg.toPath(), (int)seg.length(), new SegmentIndex(), true));
+            InitializationContext init = InitializationContextImpl.builder()
+                    .executionEnvironment(context.executionEnvironment())
+                    .databaseInitializationContext(context.currentDbContext())
+                    .tableInitializationContext(context.currentTableContext())
+                    .segmentInitializationContext(new SegmentInitializationContextImpl(
+                                    seg.getName(), seg.toPath(), (int)seg.length(),
+                                    new SegmentIndex(), true))
+                    .build();
 
             segmentInitializer.perform(init);
         }

@@ -18,6 +18,9 @@ public class SegmentInitializer implements Initializer {
 
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
+        if (context.currentSegmentContext() == null) {
+            throw new DatabaseException("Context segment is null");
+        }
         Segment segment = new SegmentImpl(context.currentSegmentContext());
         context.currentTableContext().updateCurrentSegment(segment);
 
@@ -25,13 +28,19 @@ public class SegmentInitializer implements Initializer {
         try {
             DatabaseInputStream init = new DatabaseInputStream(new FileInputStream(file));
 
-            int pos = 0;
-            while (pos != file.length()) {
+
+            for (int i = 0; i < file.length();) {
                 Optional<DatabaseStoringUnit> dbUnit = init.readDbUnit(0);
 
-                context.currentSegmentContext().getIndex().onIndexedEntityUpdated(new String(dbUnit.get().getKey()), new SegmentIndexInfoImpl(pos));
+                if (dbUnit.isEmpty()) {
+                    throw new DatabaseException("Dbunit is Empty");
+                }
+
+                context.currentSegmentContext().getIndex().onIndexedEntityUpdated(new String(dbUnit.get().getKey()), new SegmentIndexInfoImpl(i));
 
                 context.currentTableContext().getTableIndex().onIndexedEntityUpdated(new String(dbUnit.get().getKey()), segment);
+
+                i += dbUnit.get().getUnitSize();
             }
         } catch (IOException e) {
             throw new DatabaseException(e);

@@ -27,12 +27,15 @@ public class DatabaseServer {
 
         File dir = env.getWorkingPath().toFile();
 
-        InitializationContextImpl init = new InitializationContextImpl(executionEnvironment,
-                null,
-                null,
-                null);
+        if (dir.isDirectory()) {
+            InitializationContextImpl init = InitializationContextImpl.builder()
+                    .executionEnvironment(env)
+                    .build();
 
-        initializer.perform(init);
+            initializer.perform(init);
+        } else {
+            dir.mkdir();
+        }
     }
 
     public static void main(String[] args) throws IOException, DatabaseException {
@@ -43,11 +46,31 @@ public class DatabaseServer {
     }
 
     public DatabaseCommandResult executeNextCommand(String commandText) {
-        throw new UnsupportedOperationException(); // todo implement
+        if (commandText == null) {
+            return DatabaseCommandResult.error("Null command");
+        }
 
+        String[] commands = commandText.split(" ");
+        if (commands.length == 0) {
+            return DatabaseCommandResult.error("Empty command");
+        }
+
+        try {
+            return DatabaseCommands.valueOf(commands[0]).getCommand(executionEnvironment, commands).execute();
+        } catch (DatabaseException e) {
+            return DatabaseCommandResult.error(e.getMessage());
+        }
     }
 
     public DatabaseCommandResult executeNextCommand(DatabaseCommand command) {
-        throw new UnsupportedOperationException(); // todo implement
+        if (command == null) {
+            return DatabaseCommandResult.error("Null command");
+        }
+
+        try {
+            return command.execute();
+        } catch (DatabaseException e) {
+            return DatabaseCommandResult.error(e.getMessage());
+        }
     }
 }

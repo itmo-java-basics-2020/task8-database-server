@@ -18,7 +18,14 @@ public class DatabaseInitializer implements Initializer {
 
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
+        if (context.currentDbContext() == null) {
+            throw new DatabaseException("Context Db is null");
+        }
         File dir = context.currentDbContext().getDatabasePath().toFile();
+
+        if (dir.listFiles() == null) {
+            return;
+        }
 
         File[] tables = dir.listFiles();
         for (File table : tables) {
