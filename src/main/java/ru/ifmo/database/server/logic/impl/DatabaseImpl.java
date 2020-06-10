@@ -13,7 +13,13 @@ public class DatabaseImpl implements Database {
 
     private final String dbName;
     private final Path databasePath;
-    private final HashMap<String, Table> tables;
+    private final Map<String, Table> tables;
+
+    public DatabaseImpl(DatabaseInitializationContext context) {
+        dbName = context.getDbName();
+        databasePath = context.getDatabasePath();
+        tables = context.getTables();
+    }
 
     private DatabaseImpl(String dbName, Path databaseRoot) throws DatabaseException {
         this.dbName = dbName;
@@ -22,20 +28,25 @@ public class DatabaseImpl implements Database {
         if (dir.isDirectory()) {
             throw new DatabaseException("Directory with path: " + databasePath + " already exist");
         }
+        if (!dir.mkdir()) {
+            throw new DatabaseException("Can't create directory:" + dir.getAbsolutePath());
+        }
         tables = new HashMap<>();
     }
 
     public static void main(String[] args) throws DatabaseException {
-        Database database = create("DatabaseTest", Path.of("./"));
-        database.createTableIfNotExists("TableTest");
+        DatabaseStoringUnit unit = new DatabaseStoringUnit("key_12345", "value_36918_6438_8858");
+        System.out.println(unit.getValueSize());
+//        Database database = create("DatabaseTest", Path.of("./"));
+//        database.createTableIfNotExists("TableTest");
     }
 
     public static Database create(String dbName, Path databaseRoot) throws DatabaseException {
         return new DatabaseImpl(dbName, databaseRoot);
     }
 
-    public static Database initializeFromContext(DatabaseInitializationContext context) {
-        throw new UnsupportedOperationException(); // todo implement
+    public static Database initializeFromContext(DatabaseInitializationContext context) throws DatabaseException {
+        return new DatabaseImpl(context);
     }
 
     @Override
@@ -46,7 +57,7 @@ public class DatabaseImpl implements Database {
     @Override
     public void createTableIfNotExists(String tableName) throws DatabaseException {
         if (tables.containsKey(tableName)) {
-            return;
+            throw new DatabaseException("table already exist");
         }
         Table t = TableImpl.create(tableName, databasePath);
         tables.put(tableName, t);

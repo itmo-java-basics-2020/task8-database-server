@@ -21,7 +21,6 @@ public class DatabaseServer {
 
     public DatabaseServer(ExecutionEnvironment env, Initializer initializer) throws DatabaseException {
         this.env = env;
-        System.out.println(env);
         File dir = new File(env.getWorkingPath().toString());
         if (dir.isDirectory()) {
             InitializationContextImpl initializationContext = InitializationContextImpl.builder()
@@ -55,7 +54,7 @@ public class DatabaseServer {
         }
         try {
             return DatabaseCommands.valueOf(arguments[0]).getCommand(env, arguments).execute();
-        } catch (DatabaseException e) {
+        } catch (DatabaseException | IllegalArgumentException e) {
             return DatabaseCommandResult.error(e.getMessage());
         }
     }

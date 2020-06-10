@@ -1,12 +1,15 @@
 package ru.ifmo.database.server.logic.impl;
 
+import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.index.SegmentIndexInfo;
 import ru.ifmo.database.server.index.impl.SegmentIndex;
+import ru.ifmo.database.server.index.impl.SegmentIndexInfoImpl;
 import ru.ifmo.database.server.initialization.SegmentInitializationContext;
 import ru.ifmo.database.server.logic.Segment;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Optional;
 
 
@@ -32,7 +35,7 @@ public class SegmentImpl implements Segment {
         segmentIndex = new SegmentIndex();
     }
 
-    public SegmentImpl(String segmentName, Path segmentPath, boolean readOnly, SegmentIndex segmentIndex) {
+    private SegmentImpl(String segmentName, Path segmentPath, boolean readOnly, SegmentIndex segmentIndex) {
         this.segmentName = segmentName;
         this.segmentPath = segmentPath;
         this.readOnly = readOnly;
@@ -67,10 +70,13 @@ public class SegmentImpl implements Segment {
 
     @Override
     public SegmentWriteResult write(String objectKey, String objectValue, int notPrintedPart) {
+
         try {
             DatabaseOutputStream out = new DatabaseOutputStream(
                     new FileOutputStream(segmentPath.toString(), true), DEFAULT_SEGMENT_SIZE);
-
+            if (notPrintedPart == -1) {
+                segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentIndexInfoImpl(new File(segmentPath.toString()).length()));
+            }
             int newNotPrintedPart = (notPrintedPart == -1) ?
                     out.write(new DatabaseStoringUnit(objectKey, objectValue)) :
                     out.write(new DatabaseStoringUnit(objectKey, objectValue), notPrintedPart);
@@ -91,15 +97,22 @@ public class SegmentImpl implements Segment {
         }
         DatabaseInputStream in = new DatabaseInputStream(new FileInputStream(segmentPath.toString()),
                 segmentIndexInfo.get().getOffset());
-        return in.readDbUnit();
+        SegmentReadResult result = in.readDbUnit();
+        in.close();
+        return result;
     }
 
     @Override
-    public SegmentReadResult read(String objectKey, SegmentReadResult previousPart) throws IOException {
+    public SegmentReadResult read(String objectKey, SegmentReadResult previousPart) throws IOException, DatabaseException {
 
-        DatabaseInputStream in = new DatabaseInputStream(new FileInputStream(segmentPath.toString()),
-                0);
-        return in.readDbUnit(previousPart);
+        Optional<SegmentIndexInfo> offset = segmentIndex.searchForKey(objectKey);
+        if (offset.isEmpty()) {
+            throw new DatabaseException("ERROR WITH INDEXING");
+        }
+        DatabaseInputStream in = new DatabaseInputStream(new FileInputStream(segmentPath.toString()), offset.get().getOffset());
+        SegmentReadResult result = in.readDbUnit(previousPart);
+        in.close();
+        return result;
     }
 
     @Override

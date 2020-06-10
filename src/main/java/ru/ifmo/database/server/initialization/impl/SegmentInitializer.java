@@ -22,13 +22,14 @@ public class SegmentInitializer implements Initializer {
     public void perform(InitializationContext context) throws DatabaseException {
         TableInitializationContext tableContext = context.currentTableContext();
         SegmentInitializationContext segmentContext = context.currentSegmentContext();
+
         if (segmentContext == null) {
             throw new DatabaseException("Segment context  equals zero");
         }
         File file = new File(segmentContext.getSegmentPath().toString());
         DatabaseInputStream in;
         Segment segment = SegmentImpl.initializeFromContext(segmentContext);
-        tableContext.updateCurrentSegment(segment);
+        tableContext.addSegment(segment);
         try {
             in = new DatabaseInputStream(new FileInputStream(file));
         } catch (IOException e) {
@@ -36,26 +37,30 @@ public class SegmentInitializer implements Initializer {
         }
 
         SegmentReadResult previousPart = tableContext.getPrevPart();
-        SegmentReadResult endingPart = null;
-        try {
-            endingPart = in.readDbUnit(previousPart);
-        } catch (IOException e) {
-            throw new DatabaseException(e);
-        }
-        SegmentReadResult resultDbUnit = SegmentReadResult.merge(previousPart, endingPart);
-        int offset = endingPart.getReadLength();
-        if (resultDbUnit.getStatus() != SegmentOperationResult.OperationStatus.SUCCESS) {
-            tableContext.setPrevPart(resultDbUnit);
-            return;
-        }
-        InitializationContext initializationContext = tableContext.getInitializationContexts().get(tableContext.getPrevIndex());
-        String previousResultKey = new String(resultDbUnit.getUnit().get().getKey());
+        int offset = 0;
+        if (previousPart != null) {
+            SegmentReadResult endingPart = null;
+            try {
+                endingPart = in.readDbUnit(previousPart);
+            } catch (IOException e) {
+                throw new DatabaseException(e);
+            }
 
-        initializationContext.currentSegmentContext().getIndex().onIndexedEntityUpdated(previousResultKey,
-                new SegmentIndexInfoImpl(tableContext.getPrevOffset())); // segmentIndexing for the last segment in previous segment
+            SegmentReadResult resultDbUnit = SegmentReadResult.merge(previousPart, endingPart);
+            offset = endingPart.getReadLength();
+            if (resultDbUnit.getStatus() != SegmentOperationResult.OperationStatus.SUCCESS) {
+                tableContext.setPrevPart(resultDbUnit);
+                return;
+            }
+            InitializationContext initializationContext = tableContext.getInitializationContexts().get(tableContext.getPrevIndex());
+            String previousResultKey = new String(resultDbUnit.getUnit().get().getKey());
 
-        initializationContext.currentTableContext().getTableIndex().onIndexedEntityUpdated(previousResultKey,
-                initializationContext.currentTableContext().getSegment(previousResultKey)); // tableIndexing for the last segment in previous segment
+            initializationContext.currentSegmentContext().getIndex().onIndexedEntityUpdated(previousResultKey,
+                    new SegmentIndexInfoImpl(tableContext.getPrevOffset())); // segmentIndexing for the last segment in previous segment
+
+            initializationContext.currentTableContext().getTableIndex().onIndexedEntityUpdated(previousResultKey,
+                    initializationContext.currentTableContext().getSegment(previousResultKey)); // tableIndexing for the last segment in previous segment
+        }
         while (true) {
             SegmentReadResult result = null;
             try {

@@ -23,10 +23,13 @@ public class DatabaseInputStream extends DataInputStream {
         byte[] key = readDbUnitPart();
         byte[] value = readDbUnitPart();
         byte[] result = mergeArrays(key, value);
-        return SegmentReadResult.needMore(result);
+        return SegmentReadResult.merge(SegmentReadResult.empty(), SegmentReadResult.needMore(result));
     }
 
     public SegmentReadResult readDbUnit(SegmentReadResult previousPart) throws IOException {
+        if (previousPart == null) {
+            return readDbUnit();
+        }
         byte[] keySize = previousPart.getKeySizeBytes();
         byte[] key = previousPart.getKeyBytes();
         byte[] valueSize = previousPart.getValueSizeBytes();
@@ -42,15 +45,23 @@ public class DatabaseInputStream extends DataInputStream {
 
         if (!previousPart.isKeySizeRead()) {
             newKeySize = in.readNBytes(DEFAULT_LENGTH - keySize.length);
+            previousPart = SegmentReadResult.merge(previousPart, SegmentReadResult.needMore(newKeySize));
+            keySize = previousPart.getKeySizeBytes();
+            keyLength = keySize.length == 4 ? ByteBuffer.wrap(keySize).getInt() : -1;
         }
         if (!previousPart.isKeyRead() && previousPart.isKeySizeRead()) {
             newKey = in.readNBytes(keyLength - key.length);
+            previousPart = SegmentReadResult.merge(previousPart, SegmentReadResult.needMore(newKey));
         }
         if (!previousPart.isValueSizeRead() && previousPart.isKeyRead()) {
             newValueSize = in.readNBytes(DEFAULT_LENGTH - valueSize.length);
+            previousPart = SegmentReadResult.merge(previousPart, SegmentReadResult.needMore(newValueSize));
+            valueSize = previousPart.getValueSizeBytes();
+            valueLength = valueSize.length == 4 ? ByteBuffer.wrap(valueSize).getInt() : -1;
         }
         if (!previousPart.isValueRead() && previousPart.isValueSizeRead()) {
             newValue = in.readNBytes(valueLength - value.length);
+            previousPart = SegmentReadResult.merge(previousPart, SegmentReadResult.needMore(newValue));
         }
         return SegmentReadResult.needMore(mergeArrays(newKeySize, newKey, newValueSize, newValue));
     }

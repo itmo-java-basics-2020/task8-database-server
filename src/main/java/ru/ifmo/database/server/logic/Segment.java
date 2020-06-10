@@ -1,5 +1,6 @@
 package ru.ifmo.database.server.logic;
 
+import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.logic.impl.SegmentReadResult;
 import ru.ifmo.database.server.logic.impl.SegmentWriteResult;
 
@@ -38,7 +39,7 @@ public interface Segment {
      * @return
      * @throws IOException
      */
-    SegmentReadResult read(String objectKey, SegmentReadResult previousPart) throws IOException;
+    SegmentReadResult read(String objectKey, SegmentReadResult previousPart) throws IOException, DatabaseException;
 
     boolean isReadOnly();
 }

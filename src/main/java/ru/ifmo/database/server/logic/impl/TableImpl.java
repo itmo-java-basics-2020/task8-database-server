@@ -30,8 +30,11 @@ public class TableImpl implements Table {
 
     private Segment lastSegment;
 
-    public static void main(String[] args) {
-        System.out.println(File.separator);
+    public TableImpl(TableInitializationContext context) {
+        tableName = context.getTableName();
+        pathToTableRoot = context.getTablePath();
+        tableIndex = context.getTableIndex();
+        lastSegment = context.getCurrentSegment();
     }
 
     private TableImpl(String tableName, Path pathToDatabaseRoot) throws DatabaseException {
@@ -52,8 +55,8 @@ public class TableImpl implements Table {
         return new TableImpl(tableName, pathToDatabaseRoot);
     }
 
-    public static Table initializeFromContext(TableInitializationContext context) {
-        throw new UnsupportedOperationException(); // todo implement
+    public static Table initializeFromContext(TableInitializationContext context) throws DatabaseException {
+        return new TableImpl(context);
     }
 
     @Override
@@ -63,9 +66,8 @@ public class TableImpl implements Table {
 
     @Override
     public void write(String objectKey, String objectValue) throws DatabaseException {
-        if (tableIndex.searchForKey(objectKey).isPresent()) {
-            return; // todo return or throw?
-        }
+
+        tableIndex.onIndexedEntityUpdated(objectKey, lastSegment);
         SegmentWriteResult result = SegmentWriteResult.empty();
         while (result.getStatus() == NEED_MORE) {
             result = lastSegment.write(objectKey, objectValue, result.getNotPrintedLength());
@@ -84,6 +86,9 @@ public class TableImpl implements Table {
     public String read(String objectKey) throws DatabaseException {
         SegmentReadResult result = SegmentReadResult.empty();
         Optional<Segment> currentSegment = tableIndex.searchForKey(objectKey);
+        if (currentSegment.isEmpty()) {
+            return null;
+        }
         while (result.getStatus() == NEED_MORE) {
             try {
                 if (currentSegment.isPresent()) {

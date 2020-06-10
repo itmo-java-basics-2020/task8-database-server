@@ -32,6 +32,7 @@ public class DatabaseOutputStream extends DataOutputStream {
      */
     public int write(DatabaseStoringUnit storingUnit) throws IOException {
         byte[] data = getConcatenatedArray(storingUnit);
+
         return write(data, data.length);
     }
 
@@ -50,7 +51,9 @@ public class DatabaseOutputStream extends DataOutputStream {
 
     private int write(byte[] data, int notPrintedLength) throws IOException {
         int newNotPrintedLength = Math.max(writtenLength + notPrintedLength - segmentLength, 0);
+
         byte[] finalData = Arrays.copyOfRange(data, data.length - notPrintedLength, data.length - newNotPrintedLength);
+
         writtenLength += finalData.length;
         out.write(finalData);
         return newNotPrintedLength;

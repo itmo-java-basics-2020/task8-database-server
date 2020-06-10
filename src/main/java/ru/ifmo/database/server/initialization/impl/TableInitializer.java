@@ -28,7 +28,7 @@ public class TableInitializer implements Initializer {
         }
         File dir = new File(context.currentTableContext().getTablePath().toString());
         if (dir.listFiles() == null) {
-            throw new DatabaseException("Not correct table path");
+            return;
         }
         ArrayList<InitializationContext> contexts = context.currentTableContext().getInitializationContexts();
         //noinspection ConstantConditions

@@ -2,7 +2,6 @@ package ru.ifmo.database.server.initialization.impl;
 
 import ru.ifmo.database.server.index.impl.TableIndex;
 import ru.ifmo.database.server.initialization.InitializationContext;
-import ru.ifmo.database.server.initialization.SegmentInitializationContext;
 import ru.ifmo.database.server.initialization.TableInitializationContext;
 import ru.ifmo.database.server.logic.Segment;
 import ru.ifmo.database.server.logic.impl.SegmentReadResult;
@@ -17,7 +16,7 @@ import java.util.Map;
 public class TableInitializationContextImpl implements TableInitializationContext {
 
     private final String tableName;
-    private final Path databasePath;
+    private final Path tablePath;
     private final TableIndex tableIndex;
     private Segment currentSegment;
     private final ArrayList<InitializationContext> initializationContexts;
@@ -27,11 +26,11 @@ public class TableInitializationContextImpl implements TableInitializationContex
     private int currentIndex;
     private final HashMap<String, Segment> segments;
 
-    public TableInitializationContextImpl(String tableName, Path databasePath, TableIndex tableIndex) {
+    public TableInitializationContextImpl(String tableName, Path tablePath, TableIndex tableIndex) {
         segments = new HashMap<>();
         initializationContexts = new ArrayList<>();
         this.tableName = tableName;
-        this.databasePath = databasePath;
+        this.tablePath = tablePath;
         this.tableIndex = tableIndex;
         currentSegment = null;
     }
@@ -43,7 +42,7 @@ public class TableInitializationContextImpl implements TableInitializationContex
 
     @Override
     public Path getTablePath() {
-        return Paths.get(databasePath.toString() + File.separator + tableName);
+        return tablePath;
     }
 
     @Override
@@ -74,6 +73,7 @@ public class TableInitializationContextImpl implements TableInitializationContex
     @Override
     public void addSegment(Segment segment) {
         segments.put(segment.getName(), segment);
+        currentSegment = segment;
     }
 
     @Override
