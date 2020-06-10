@@ -1,5 +1,6 @@
 package ru.ifmo.database.server.initialization.impl;
 
+import lombok.Getter;
 import ru.ifmo.database.server.index.impl.TableIndex;
 import ru.ifmo.database.server.initialization.InitializationContext;
 import ru.ifmo.database.server.initialization.TableInitializationContext;
@@ -12,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
+@Getter
 public class TableInitializationContextImpl implements TableInitializationContext {
 
     private final String tableName;

@@ -1,11 +1,12 @@
 package ru.ifmo.database.server.logic.impl;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+
+import static ru.ifmo.database.server.logic.impl.MergeArrays.*;
 
 public class DatabaseOutputStream extends DataOutputStream {
     private static final int DEFAULT_LENGTH = 4;
@@ -61,24 +62,12 @@ public class DatabaseOutputStream extends DataOutputStream {
 
 
     private byte[] getConcatenatedArray(DatabaseStoringUnit storingUnit) {
-        int size = 0;
         byte[][] arrays = {
                 ByteBuffer.allocate(DEFAULT_LENGTH).putInt(storingUnit.getKeySize()).array(), // keySize
                 storingUnit.getKey(), // key
                 ByteBuffer.allocate(DEFAULT_LENGTH).putInt(storingUnit.getValueSize()).array(), // valueSize
                 storingUnit.getValue() // value
         };
-        for (byte[] array :
-                arrays) {
-            size += array.length;
-        }
-        byte[] data = new byte[size];
-        int offset = 0;
-        for (byte[] array :
-                arrays) {
-            System.arraycopy(array, 0, data, offset, array.length);
-            offset += array.length;
-        }
-        return data;
+        return mergeArrays(arrays);
     }
 }

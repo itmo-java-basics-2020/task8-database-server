@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import static ru.ifmo.database.server.logic.impl.MergeArrays.mergeArrays;
+
 public class DatabaseInputStream extends DataInputStream {
     private static final int DEFAULT_LENGTH = 4;
 
 
-    public DatabaseInputStream(InputStream inputStream) throws IOException {
+    public DatabaseInputStream(InputStream inputStream)  {
         super(inputStream);
     }
 
@@ -43,25 +45,24 @@ public class DatabaseInputStream extends DataInputStream {
         byte[] newValueSize = new byte[0];
         byte[] newValue = new byte[0];
 
-        if (!previousPart.isKeySizeRead()) {
+        if (!previousPart.isKeySizeRead()) { // reading keySize;
             newKeySize = in.readNBytes(DEFAULT_LENGTH - keySize.length);
             previousPart = SegmentReadResult.merge(previousPart, SegmentReadResult.needMore(newKeySize));
             keySize = previousPart.getKeySizeBytes();
             keyLength = keySize.length == 4 ? ByteBuffer.wrap(keySize).getInt() : -1;
         }
-        if (!previousPart.isKeyRead() && previousPart.isKeySizeRead()) {
+        if (!previousPart.isKeyRead() && previousPart.isKeySizeRead()) { // reading key
             newKey = in.readNBytes(keyLength - key.length);
             previousPart = SegmentReadResult.merge(previousPart, SegmentReadResult.needMore(newKey));
         }
-        if (!previousPart.isValueSizeRead() && previousPart.isKeyRead()) {
+        if (!previousPart.isValueSizeRead() && previousPart.isKeyRead()) { // reading valueSize
             newValueSize = in.readNBytes(DEFAULT_LENGTH - valueSize.length);
             previousPart = SegmentReadResult.merge(previousPart, SegmentReadResult.needMore(newValueSize));
             valueSize = previousPart.getValueSizeBytes();
             valueLength = valueSize.length == 4 ? ByteBuffer.wrap(valueSize).getInt() : -1;
         }
-        if (!previousPart.isValueRead() && previousPart.isValueSizeRead()) {
+        if (!previousPart.isValueRead() && previousPart.isValueSizeRead()) { // reading value
             newValue = in.readNBytes(valueLength - value.length);
-            previousPart = SegmentReadResult.merge(previousPart, SegmentReadResult.needMore(newValue));
         }
         return SegmentReadResult.needMore(mergeArrays(newKeySize, newKey, newValueSize, newValue));
     }
@@ -78,18 +79,6 @@ public class DatabaseInputStream extends DataInputStream {
     }
 
 
-    public static byte[] mergeArrays(byte[]... arrays) {
-        int totalLength = 0;
-        for (byte[] array : arrays) {
-            totalLength += array.length;
-        }
-        byte[] result = new byte[totalLength];
-        int pos = 0;
-        for (byte[] array : arrays) {
-            System.arraycopy(array, 0, result, pos, array.length);
-            pos += array.length;
-        }
-        return result;
-    }
+
 
 }

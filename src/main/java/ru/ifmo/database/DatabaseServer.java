@@ -10,13 +10,10 @@ import ru.ifmo.database.server.initialization.Initializer;
 import ru.ifmo.database.server.initialization.impl.*;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class DatabaseServer {
 
-    private static ExecutorService executor = Executors.newSingleThreadExecutor();
+//    private static ExecutorService executor = Executors.newSingleThreadExecutor();
     private final ExecutionEnvironment env;
 
     public DatabaseServer(ExecutionEnvironment env, Initializer initializer) throws DatabaseException {
@@ -36,13 +33,6 @@ public class DatabaseServer {
 
     }
 
-    public static void main(String[] args) throws DatabaseException {
-        Initializer initializer = new DatabaseServerInitializer(
-                new DatabaseInitializer(new TableInitializer(new SegmentInitializer())));
-
-        DatabaseServer databaseServer = new DatabaseServer(new ExecutionEnvironmentImpl(), initializer);
-//        databaseServer.executeNextCommand()
-    }
 
     public DatabaseCommandResult executeNextCommand(String commandText) {
         if (commandText == null) {

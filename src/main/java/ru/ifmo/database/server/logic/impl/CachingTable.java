@@ -2,7 +2,6 @@ package ru.ifmo.database.server.logic.impl;
 
 import ru.ifmo.database.server.cache.DatabaseCache;
 import ru.ifmo.database.server.exception.DatabaseException;
-import ru.ifmo.database.server.logic.Database;
 import ru.ifmo.database.server.logic.Table;
 
 public class CachingTable implements Table {
