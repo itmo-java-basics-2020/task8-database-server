@@ -4,15 +4,11 @@ import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.index.impl.SegmentIndex;
 import ru.ifmo.database.server.initialization.InitializationContext;
 import ru.ifmo.database.server.initialization.Initializer;
-import ru.ifmo.database.server.initialization.SegmentInitializationContext;
-import ru.ifmo.database.server.logic.Database;
 import ru.ifmo.database.server.logic.Table;
 import ru.ifmo.database.server.logic.impl.CachingTable;
-import ru.ifmo.database.server.logic.impl.DatabaseImpl;
 import ru.ifmo.database.server.logic.impl.TableImpl;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 
 public class TableInitializer implements Initializer {

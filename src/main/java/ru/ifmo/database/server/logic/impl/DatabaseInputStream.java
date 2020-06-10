@@ -45,23 +45,27 @@ public class DatabaseInputStream extends DataInputStream {
         byte[] newValueSize = new byte[0];
         byte[] newValue = new byte[0];
 
-        if (!previousPart.isKeySizeRead()) { // reading keySize;
+        // reading keySize;
+        if (!previousPart.isKeySizeRead()) {
             newKeySize = in.readNBytes(DEFAULT_LENGTH - keySize.length);
             previousPart = SegmentReadResult.merge(previousPart, SegmentReadResult.needMore(newKeySize));
             keySize = previousPart.getKeySizeBytes();
             keyLength = keySize.length == 4 ? ByteBuffer.wrap(keySize).getInt() : -1;
         }
-        if (!previousPart.isKeyRead() && previousPart.isKeySizeRead()) { // reading key
+        // reading key
+        if (!previousPart.isKeyRead() && previousPart.isKeySizeRead()) {
             newKey = in.readNBytes(keyLength - key.length);
             previousPart = SegmentReadResult.merge(previousPart, SegmentReadResult.needMore(newKey));
         }
-        if (!previousPart.isValueSizeRead() && previousPart.isKeyRead()) { // reading valueSize
+        // reading valueSize
+        if (!previousPart.isValueSizeRead() && previousPart.isKeyRead()) {
             newValueSize = in.readNBytes(DEFAULT_LENGTH - valueSize.length);
             previousPart = SegmentReadResult.merge(previousPart, SegmentReadResult.needMore(newValueSize));
             valueSize = previousPart.getValueSizeBytes();
             valueLength = valueSize.length == 4 ? ByteBuffer.wrap(valueSize).getInt() : -1;
         }
-        if (!previousPart.isValueRead() && previousPart.isValueSizeRead()) { // reading value
+        // reading value
+        if (!previousPart.isValueRead() && previousPart.isValueSizeRead()) {
             newValue = in.readNBytes(valueLength - value.length);
         }
         return SegmentReadResult.needMore(mergeArrays(newKeySize, newKey, newValueSize, newValue));

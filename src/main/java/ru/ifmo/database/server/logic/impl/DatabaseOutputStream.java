@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static ru.ifmo.database.server.logic.impl.MergeArrays.*;
+import static ru.ifmo.database.server.logic.impl.MergeArrays.mergeArrays;
 
 public class DatabaseOutputStream extends DataOutputStream {
     private static final int DEFAULT_LENGTH = 4;

@@ -4,11 +4,9 @@ import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.index.impl.TableIndex;
 import ru.ifmo.database.server.initialization.InitializationContext;
 import ru.ifmo.database.server.initialization.Initializer;
-import ru.ifmo.database.server.logic.Database;
 import ru.ifmo.database.server.logic.impl.DatabaseImpl;
 
 import java.io.File;
-import java.io.FileFilter;
 
 public class DatabaseInitializer implements Initializer {
     private final Initializer tableInitializer;

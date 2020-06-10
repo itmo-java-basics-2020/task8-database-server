@@ -26,12 +26,12 @@ public class SegmentInitializer implements Initializer {
         if (segmentContext == null) {
             throw new DatabaseException("Segment context  equals zero");
         }
-        File file = new File(segmentContext.getSegmentPath().toString());
-        DatabaseInputStream in;
         Segment segment = SegmentImpl.initializeFromContext(segmentContext);
         tableContext.addSegment(segment);
+
+        DatabaseInputStream in;
         try {
-            in = new DatabaseInputStream(new FileInputStream(file));
+            in = new DatabaseInputStream(new FileInputStream(segmentContext.getSegmentPath().toString()));
         } catch (IOException e) {
             throw new DatabaseException(e);
         }
@@ -39,7 +39,7 @@ public class SegmentInitializer implements Initializer {
         SegmentReadResult previousPart = tableContext.getPrevPart();
         int offset = 0;
         if (previousPart != null) {
-            SegmentReadResult endingPart = null;
+            SegmentReadResult endingPart;
             try {
                 endingPart = in.readDbUnit(previousPart);
             } catch (IOException e) {
@@ -61,8 +61,8 @@ public class SegmentInitializer implements Initializer {
             initializationContext.currentTableContext().getTableIndex().onIndexedEntityUpdated(previousResultKey,
                     initializationContext.currentTableContext().getSegment(previousResultKey)); // tableIndexing for the last segment in previous segment
         }
-        while (true) {
-            SegmentReadResult result = null;
+        while (true) { // re
+            SegmentReadResult result;
             try {
                 result = in.readDbUnit();
             } catch (IOException e) {
@@ -78,7 +78,6 @@ public class SegmentInitializer implements Initializer {
                 tableContext.setPrevPart(result);
                 tableContext.setPrevIndex(tableContext.getCurrentIndex());
                 tableContext.setPrevOffset(offset);
-
                 break;
             }
         }

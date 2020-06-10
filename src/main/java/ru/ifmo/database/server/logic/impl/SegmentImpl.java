@@ -72,7 +72,6 @@ public class SegmentImpl implements Segment {
 
     @Override
     public SegmentWriteResult write(String objectKey, String objectValue, int notPrintedPart) {
-
         try {
             DatabaseOutputStream out = new DatabaseOutputStream(
                     new FileOutputStream(segmentPath.toString(), true), DEFAULT_SEGMENT_SIZE);
@@ -106,7 +105,6 @@ public class SegmentImpl implements Segment {
 
     @Override
     public SegmentReadResult read(String objectKey, SegmentReadResult previousPart) throws IOException, DatabaseException {
-
         Optional<SegmentIndexInfo> offset = segmentIndex.searchForKey(objectKey);
         if (offset.isEmpty()) {
             throw new DatabaseException("ERROR WITH INDEXING");

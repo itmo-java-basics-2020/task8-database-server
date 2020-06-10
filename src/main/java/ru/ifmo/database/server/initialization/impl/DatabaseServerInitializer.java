@@ -1,10 +1,8 @@
 package ru.ifmo.database.server.initialization.impl;
 
 import ru.ifmo.database.server.exception.DatabaseException;
-import ru.ifmo.database.server.index.impl.TableIndex;
 import ru.ifmo.database.server.initialization.InitializationContext;
 import ru.ifmo.database.server.initialization.Initializer;
-import ru.ifmo.database.server.logic.impl.DatabaseImpl;
 
 import java.io.File;
 

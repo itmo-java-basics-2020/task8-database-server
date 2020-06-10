@@ -32,7 +32,6 @@ public class ReadKeyCommand implements DatabaseCommand {
             throw new DatabaseException("No such database: " + databaseName);
         }
         String result = database.get().read(tableName, key);
-
         return result == null ? DatabaseCommandResult.error("No such key") : DatabaseCommandResult.success(result);
     }
 }

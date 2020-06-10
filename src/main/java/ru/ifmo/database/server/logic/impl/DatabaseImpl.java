@@ -7,7 +7,8 @@ import ru.ifmo.database.server.logic.Table;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DatabaseImpl implements Database {
 
@@ -34,12 +35,6 @@ public class DatabaseImpl implements Database {
         tables = new HashMap<>();
     }
 
-    public static void main(String[] args) throws DatabaseException {
-        DatabaseStoringUnit unit = new DatabaseStoringUnit("key_12345", "value_36918_6438_8858");
-        System.out.println(unit.getValueSize());
-//        Database database = create("DatabaseTest", Path.of("./"));
-//        database.createTableIfNotExists("TableTest");
-    }
 
     public static Database create(String dbName, Path databaseRoot) throws DatabaseException {
         return new DatabaseImpl(dbName, databaseRoot);

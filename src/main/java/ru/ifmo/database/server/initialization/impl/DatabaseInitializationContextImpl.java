@@ -21,18 +21,8 @@ public class DatabaseInitializationContextImpl implements DatabaseInitialization
     }
 
     @Override
-    public String getDbName() {
-        return dbName;
-    }
-
-    @Override
     public Path getDatabasePath() {
         return databaseRoot;
-    }
-
-    @Override
-    public Map<String, Table> getTables() {
-        return tables;
     }
 
     @Override

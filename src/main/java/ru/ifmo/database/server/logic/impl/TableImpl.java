@@ -74,7 +74,9 @@ public class TableImpl implements Table {
             if (lastSegment.isReadOnly()) {
                 addSegment();
             }
-            if (result.getStatus() == ERROR) throw new DatabaseException(result.getErrorMessage().get());
+            if (result.getStatus() == ERROR) {
+                throw new DatabaseException(result.getErrorMessage().get());
+            }
         }
     }
 

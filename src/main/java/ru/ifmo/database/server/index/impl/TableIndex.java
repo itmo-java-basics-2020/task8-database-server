@@ -2,7 +2,6 @@ package ru.ifmo.database.server.index.impl;
 
 import ru.ifmo.database.server.index.AbstractDatabaseIndex;
 import ru.ifmo.database.server.logic.Segment;
-import ru.ifmo.database.server.logic.Table;
 
 import java.util.Map;
 import java.util.Optional;

@@ -17,10 +17,6 @@ public interface TableInitializationContext {
 
     Segment getCurrentSegment();
 
-    void updateCurrentSegment(Segment segment); // todo sukhoa refactor?
-
-    Map<String, Segment> getSegments();
-
     Segment getSegment(String segmentName);
 
     void addSegment(Segment segment);
@@ -36,8 +32,6 @@ public interface TableInitializationContext {
     void setPrevIndex(int index);
 
     int getCurrentIndex();
-
-    void setCurrentIndex(int index);
 
     long getPrevOffset();
 
