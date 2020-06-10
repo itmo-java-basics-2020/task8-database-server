@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static ru.ifmo.database.server.logic.SegmentOperationResult.OperationStatus.*;
+import static ru.ifmo.database.server.logic.impl.MergeArrays.mergeArrays;
 
 
 public class SegmentReadResult extends SegmentOperationResult {
@@ -42,7 +43,7 @@ public class SegmentReadResult extends SegmentOperationResult {
             return error(result1.getErrorMessage().or(() -> Optional.of("")).get()
                     + result2.getErrorMessage().or(() -> Optional.of("")).get());
         }
-        byte[] data = DatabaseInputStream.mergeArrays(result1.readData, result2.readData);
+        byte[] data = mergeArrays(result1.readData, result2.readData);
         if (data.length < 8) {
             return needMore(data);
         }
