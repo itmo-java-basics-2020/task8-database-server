@@ -35,10 +35,11 @@ public class DatabaseImpl implements Database {
         this.dbTables = new HashMap<>();
 
         try {
-            Files.createDirectory(databaseRoot);
+            Files.createFile(Path.of(databaseRoot + dbName));
         } catch (IOException e) {
             throw new DatabaseException(String.format("Database \"%s\" already exists", dbName));
         }
+
     }
 
     private DatabaseImpl(DatabaseInitializationContext context) throws DatabaseException {
