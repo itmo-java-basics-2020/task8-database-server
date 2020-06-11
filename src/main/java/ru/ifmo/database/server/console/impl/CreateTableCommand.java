@@ -14,6 +14,31 @@ public class CreateTableCommand implements DatabaseCommand {
     private final String databaseName;
     private final String tableName;
 
+    public CreateTableCommand(ExecutionEnvironment env, String databaseName, String tableName) {
+        this.env = env;
+        this.databaseName = databaseName;
+        this.tableName = tableName;
+    }
+
+    @Override
+    public DatabaseCommandResult execute() {
+        Optional<Database> database = env.getDatabase(databaseName);
+        if (database.isEmpty()) {
+            return DatabaseCommandResult.error("No database with name " + databaseName);
+        }
+        try {
+            database.get().createTableIfNotExists(tableName);
+        } catch (DatabaseException exception) {
+            return DatabaseCommandResult.error(exception.getMessage());
+        }
+        return DatabaseCommandResult.success("Table " + tableName +
+                " in database " + databaseName + " was created successfully.");
+    }
+    /*
+    private final ExecutionEnvironment env;
+    private final String databaseName;
+    private final String tableName;
+
     public CreateTableCommand(ExecutionEnvironment env, String... args) {
         if (args.length < 3) {
             throw new IllegalArgumentException("Not enough args");
@@ -31,5 +56,5 @@ public class CreateTableCommand implements DatabaseCommand {
         }
         database.get().createTableIfNotExists(tableName);
         return DatabaseCommandResult.success("Created table: " + tableName);
-    }
+    }*/
 }

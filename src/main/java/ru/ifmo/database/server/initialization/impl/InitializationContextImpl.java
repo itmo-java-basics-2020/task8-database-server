@@ -10,30 +10,38 @@ import ru.ifmo.database.server.initialization.TableInitializationContext;
 @Builder
 public class InitializationContextImpl implements InitializationContext {
 
+    private ExecutionEnvironment executionEnvironment;
+    private DatabaseInitializationContext currentDatabaseContext;
+    private TableInitializationContext currentTableContext;
+    private SegmentInitializationContext currentSegmentContext;
+
     private InitializationContextImpl(ExecutionEnvironment executionEnvironment,
                                       DatabaseInitializationContext currentDatabaseContext,
                                       TableInitializationContext currentTableContext,
                                       SegmentInitializationContext currentSegmentContext) {
-        throw new UnsupportedOperationException(); // todo implement
+        this.executionEnvironment = executionEnvironment;
+        this.currentDatabaseContext = currentDatabaseContext;
+        this.currentTableContext = currentTableContext;
+        this.currentSegmentContext = currentSegmentContext;
     }
 
     @Override
     public ExecutionEnvironment executionEnvironment() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.executionEnvironment;
     }
 
     @Override
     public DatabaseInitializationContext currentDbContext() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.currentDatabaseContext;
     }
 
     @Override
     public TableInitializationContext currentTableContext() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.currentTableContext;
     }
 
     @Override
     public SegmentInitializationContext currentSegmentContext() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.currentSegmentContext;
     }
 }
