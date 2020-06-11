@@ -17,5 +17,9 @@ public interface Table {
     void write(String objectKey, String objectValue) throws DatabaseException;
 
     String read(String objectKey) throws DatabaseException;
+
+    void addSegment(String segmentName, Segment segment);
+
+    Segment getSegment(String segmentName);
 }
 

@@ -33,7 +33,12 @@ public class UpdateKeyCommand implements DatabaseCommand {
         if (database.isEmpty()) {
             throw new DatabaseException("No such database: " + databaseName);
         }
-        String prevValue = database.get().read(tableName, key);
+        String prevValue = "";
+        try {
+            prevValue = database.get().read(tableName, key);
+        } catch (DatabaseException e) {
+            //
+        }
         database.get().write(tableName, key, value);
         return DatabaseCommandResult.success(prevValue);
     }

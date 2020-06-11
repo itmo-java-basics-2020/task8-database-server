@@ -7,9 +7,9 @@ import java.nio.file.Path;
 public interface SegmentInitializationContext {
     String getSegmentName();
 
-    Path getSegmentPath();
+    Path getTableRootPath();
 
     SegmentIndex getIndex();
 
-    int getCurrentSize(); // todo sukhoa should be long
+    int getCurrentSize();
 }
