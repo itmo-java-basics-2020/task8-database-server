@@ -71,13 +71,13 @@ public class TableImpl implements Table {
 
     @Override
     public void write(String objectKey, String objectValue) throws DatabaseException {
-        boolean success;
         try {
             // false if current segment is full
-            success = this.currentSegment.write(objectKey, objectValue);
+            boolean success = this.currentSegment.write(objectKey, objectValue);
             if (!success) {
                 String segmentName = SegmentImpl.createSegmentName(this.name);
                 this.currentSegment = SegmentImpl.create(segmentName, this.directory);
+                this.currentSegment.write(objectKey, objectValue);
             }
         } catch (IOException ex) {
             throw new DatabaseException(
