@@ -26,9 +26,6 @@ public class DatabaseServer {
 
     public DatabaseServer(ExecutionEnvironment env, Initializer initializer) throws IOException, DatabaseException {
         this.env = env;
-//        if (env == null) {
-//            throw new DatabaseException("Environment equals null");
-//        }
         InitializationContextImpl initializationContext = InitializationContextImpl.builder()
                 .executionEnvironment(env)
                 .build();

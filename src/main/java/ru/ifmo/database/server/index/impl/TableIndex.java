@@ -1,12 +1,11 @@
 package ru.ifmo.database.server.index.impl;
 
-import ru.ifmo.database.server.index.AbstractDatabaseIndex;
 import ru.ifmo.database.server.index.SegmentIndexInfo;
 import ru.ifmo.database.server.logic.Segment;
 
 import java.util.HashMap;
 
-public class TableIndex extends AbstractDatabaseIndex<String, Segment> {
+public class TableIndex {
     private final HashMap<String, Segment> tableMap;
 
     public TableIndex() {

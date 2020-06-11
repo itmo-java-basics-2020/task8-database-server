@@ -24,5 +24,5 @@ public interface TableInitializationContext {
 
     Map<String, Segment> getSegments();
 
-    void updateCurrentSegment(Segment segment); // todo sukhoa refactor?
+    void updateCurrentSegment(Segment segment);
 }

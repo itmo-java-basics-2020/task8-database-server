@@ -18,7 +18,7 @@ public class DatabaseImpl implements Database {
     private final String dbName;
     private final Path databaseRoot;
     private final HashMap<String, Table> dbTables;
-    private final LRU<String, String> cache = new LRU<>(10);
+    private final LRU<String, String> cache = new LRU<>(5);
 
     private DatabaseImpl(String dbName, Path databaseRoot) {
         try {
@@ -71,11 +71,6 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public void createTableIfNotExists(String tableName, int segmentSizeInBytes) throws DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
-    }
-
-    @Override
     public void write(String tableName, String objectKey, String objectValue) throws DatabaseException {
         if (!dbTables.containsKey(tableName)) {
             throw new DatabaseException("No such table");
@@ -87,6 +82,9 @@ public class DatabaseImpl implements Database {
 
     @Override
     public String read(String tableName, String objectKey) throws DatabaseException {
+        if (!dbTables.containsKey(tableName)) {
+            throw new DatabaseException("No such table");
+        }
         String value = cache.get(objectKey);
         if (value == null) {
             value = dbTables.get(tableName).read(objectKey);

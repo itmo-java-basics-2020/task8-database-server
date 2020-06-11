@@ -15,9 +15,6 @@ public interface Segment {
 
     String getName();
 
-    // todo sukhoa in future may return something like SegmentWriteResult .. with report and error details?
-    // for new returns false if cannot allocate requested capacity
-    // exception is questionable
     boolean write(String objectKey, String objectValue) throws DatabaseException;
 
     String read(String objectKey) throws DatabaseException;

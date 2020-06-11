@@ -10,6 +10,7 @@ import ru.ifmo.database.server.logic.impl.TableImpl;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 public class TableInitializer implements Initializer {
 
@@ -26,6 +27,7 @@ public class TableInitializer implements Initializer {
         if (segments == null) {
             return;
         }
+        Arrays.sort(segments);
         for (String segment : segments) {
             context.currentTableContext().updateCurrentSegment(SegmentImpl.create(segment,
                     context.currentTableContext().getTablePath()));

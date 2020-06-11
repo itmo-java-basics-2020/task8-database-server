@@ -20,9 +20,6 @@ public class DatabaseServerInitializer implements Initializer {
 
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
-//        if (context.executionEnvironment() == null) {
-//            throw new DatabaseException("Execution environment equals null");
-//        }
         File file = new File(context.executionEnvironment().getWorkingPath().toString());
         String[] directories = file.list((current, name) -> new File(current, name).isDirectory());
         if (directories == null) {

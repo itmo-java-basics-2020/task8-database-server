@@ -13,15 +13,16 @@ public class DatabaseInputStream extends DataInputStream {
 
     public DatabaseStoringUnit readDbUnit(int offset) throws IOException {
         try {
-            in.skipNBytes(offset);
-            int keyLen = in.read();
-            byte[] word = new byte[keyLen];
-            in.read(word, 0, keyLen);
-            String key = new String(word);
-            int valueLen = in.read();
-            word = new byte[valueLen];
-            in.read(word, 0, valueLen);
-            String value = new String(word);
+            skipNBytes(offset);
+
+            int keySize = readInt();
+            byte[] key = new byte[keySize];
+            readNBytes(key, 0, keySize);
+
+            int valueSize = readInt();
+            byte[] value = new byte[valueSize];
+            readNBytes(value, 0, valueSize);
+
             return new DatabaseStoringUnit(key, value);
         } catch (Exception e) {
             return null;

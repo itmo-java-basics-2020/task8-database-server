@@ -11,10 +11,10 @@ public class DatabaseOutputStream extends DataOutputStream {
 
     int write(DatabaseStoringUnit storingUnit) {
         try {
-            out.write(storingUnit.getKeySize());
-            out.write(storingUnit.getKey());
-            out.write(storingUnit.getValueSize());
-            out.write(storingUnit.getValue());
+            writeInt(storingUnit.getKeySize());
+            write(storingUnit.getKey());
+            writeInt(storingUnit.getValueSize());
+            write(storingUnit.getValue());
             return 1;
         } catch (IOException e) {
             return 0;
