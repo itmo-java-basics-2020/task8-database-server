@@ -32,20 +32,7 @@ public class DatabaseServer {
         initializer.perform(initializationContext);
     }
 
-    public static void main(String[] args) throws IOException, DatabaseException {
-        Initializer initializer = new DatabaseServerInitializer(
-                new DatabaseInitializer(new TableInitializer(new SegmentInitializer())));
-
-        ExecutionEnvironment e = new ExecutionEnvironmentImpl();
-        DatabaseServer databaseServer = new DatabaseServer(e, initializer);
-        databaseServer.env.getDatabase("db_35875").get().createTableIfNotExists("1");
-        databaseServer.env.getDatabase("db_35875").get().createTableIfNotExists("2");
-        databaseServer.env.getDatabase("db_35875").get().createTableIfNotExists("3");
-        databaseServer.env.getDatabase("db_35875").get().createTableIfNotExists("4");
-        databaseServer.env.getDatabase("db_35875").get().createTableIfNotExists("5");
-        databaseServer.env.getDatabase("db_35875").get().createTableIfNotExists("6");
-        databaseServer.env.getDatabase("db_35875").get().createTableIfNotExists("7");
-
+    public static void main(String[] args) {
     }
 
     public DatabaseCommandResult executeNextCommand(String commandText) {
