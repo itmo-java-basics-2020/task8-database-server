@@ -8,8 +8,11 @@ import ru.ifmo.database.server.logic.Table;
 import ru.ifmo.database.server.logic.impl.CachingTable;
 import ru.ifmo.database.server.logic.impl.TableImpl;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 public class TableInitializer implements Initializer {
 
@@ -22,29 +25,33 @@ public class TableInitializer implements Initializer {
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
         if (context.currentTableContext() == null) {
-            throw new DatabaseException("Segment context  equals zero");
+            throw new DatabaseException("Segment context equals zero");
         }
-        File dir = new File(context.currentTableContext().getTablePath().toString());
-        if (dir.listFiles() == null) {
+
+        Path dir = context.currentTableContext().getTablePath();
+        Stream<Path> paths;
+        try {
+            paths = Files.list(dir);
+        } catch (IOException e) {
+            e.printStackTrace();
             return;
         }
         ArrayList<InitializationContext> contexts = context.currentTableContext().getInitializationContexts();
-        //noinspection ConstantConditions
-        for (File segment :
-                dir.listFiles((dir1, name) -> name.startsWith(context.currentTableContext().getTableName()))) {
-
+        paths.forEach(segment -> {
             InitializationContext initializationContext = InitializationContextImpl.builder()
                     .executionEnvironment(context.executionEnvironment())
                     .currentDatabaseContext(context.currentDbContext())
                     .currentTableContext(context.currentTableContext())
-                    .currentSegmentContext(new SegmentInitializationContextImpl(segment.getName(),
-                            segment.toPath(),
-                            new SegmentIndex(),
-                            segment.length()))
+                    .currentSegmentContext(new SegmentInitializationContextImpl(segment.getFileName().toString(),
+                            segment, new SegmentIndex(), segment.toFile().length()))
                     .build();
-            contexts.add(initializationContext);
-            segmentInitializer.perform(initializationContext);
-        }
+            try {
+                contexts.add(initializationContext);
+                segmentInitializer.perform(initializationContext);
+            } catch (DatabaseException e) {
+                e.printStackTrace();
+            }
+        });
         Table cachingTable = new CachingTable(TableImpl.initializeFromContext(context.currentTableContext()));
         context.currentDbContext().addTable(cachingTable);
 

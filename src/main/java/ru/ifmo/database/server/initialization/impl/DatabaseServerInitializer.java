@@ -4,7 +4,10 @@ import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.initialization.InitializationContext;
 import ru.ifmo.database.server.initialization.Initializer;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Stream;
 
 public class DatabaseServerInitializer implements Initializer {
 
@@ -20,17 +23,24 @@ public class DatabaseServerInitializer implements Initializer {
         if (context.executionEnvironment() == null) {
             throw new DatabaseException("Environment context equals null");
         }
-        File dir = new File(context.executionEnvironment().getWorkingPath().toString());
-        if (dir.listFiles() == null) {
-            throw new DatabaseException("Not correct Env directory path");
+        Path dir = context.executionEnvironment().getWorkingPath();
+        Stream<Path> paths;
+        try {
+            paths = Files.list(dir);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
         }
-        //noinspection ConstantConditions
-        for (File database : dir.listFiles(File::isDirectory)) {
+        paths.forEach(path -> {
             InitializationContext initializationContext = InitializationContextImpl.builder()
                     .executionEnvironment(context.executionEnvironment())
-                    .currentDatabaseContext(new DatabaseInitializationContextImpl(database.getName(), database.toPath()))
+                    .currentDatabaseContext(new DatabaseInitializationContextImpl(path.getFileName().toString(), path.toAbsolutePath()))
                     .build();
-            databaseInitializer.perform(initializationContext);
-        }
+            try {
+                databaseInitializer.perform(initializationContext);
+            } catch (DatabaseException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

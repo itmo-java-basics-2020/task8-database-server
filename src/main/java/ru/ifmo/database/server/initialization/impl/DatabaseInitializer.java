@@ -6,7 +6,10 @@ import ru.ifmo.database.server.initialization.InitializationContext;
 import ru.ifmo.database.server.initialization.Initializer;
 import ru.ifmo.database.server.logic.impl.DatabaseImpl;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Stream;
 
 public class DatabaseInitializer implements Initializer {
     private final Initializer tableInitializer;
@@ -20,19 +23,27 @@ public class DatabaseInitializer implements Initializer {
         if (context.currentDbContext() == null) {
             throw new DatabaseException("DbContext equals null");
         }
-        File dir = new File(context.currentDbContext().getDatabasePath().toString());
-        if (dir.listFiles() == null) {
-            throw new DatabaseException("Not correct DB directory path");
+        Path dir = context.currentDbContext().getDatabasePath();
+        Stream<Path> paths;
+        try {
+            paths = Files.list(dir);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
         }
-        //noinspection ConstantConditions
-        for (File table : dir.listFiles(File::isDirectory)) {
+        paths.forEach(path -> {
             InitializationContext initializationContext = InitializationContextImpl.builder()
                     .executionEnvironment(context.executionEnvironment())
                     .currentDatabaseContext(context.currentDbContext())
-                    .currentTableContext(new TableInitializationContextImpl(table.getName(), table.toPath(), new TableIndex()))
-                    .currentSegmentContext(context.currentSegmentContext()).build();
-            tableInitializer.perform(initializationContext);
-        }
+                    .currentTableContext(new TableInitializationContextImpl(path.getFileName().toString(), path.toAbsolutePath(), new TableIndex()))
+                    .currentSegmentContext(context.currentSegmentContext())
+                    .build();
+            try {
+                tableInitializer.perform(initializationContext);
+            } catch (DatabaseException e) {
+                e.printStackTrace();
+            }
+        });
         context.executionEnvironment().addDatabase(DatabaseImpl.initializeFromContext(context.currentDbContext()));
     }
 }

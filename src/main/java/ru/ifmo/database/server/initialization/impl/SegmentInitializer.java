@@ -12,7 +12,6 @@ import ru.ifmo.database.server.logic.impl.DatabaseInputStream;
 import ru.ifmo.database.server.logic.impl.SegmentImpl;
 import ru.ifmo.database.server.logic.impl.SegmentReadResult;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -56,12 +55,12 @@ public class SegmentInitializer implements Initializer {
             String previousResultKey = new String(resultDbUnit.getUnit().get().getKey());
 
             initializationContext.currentSegmentContext().getIndex().onIndexedEntityUpdated(previousResultKey,
-                    new SegmentIndexInfoImpl(tableContext.getPrevOffset())); // segmentIndexing for the last segment in previous segment
+                    new SegmentIndexInfoImpl(tableContext.getPrevOffset())); // segmentIndexing for the last unit in previous segment
 
             initializationContext.currentTableContext().getTableIndex().onIndexedEntityUpdated(previousResultKey,
-                    initializationContext.currentTableContext().getSegment(previousResultKey)); // tableIndexing for the last segment in previous segment
+                    initializationContext.currentTableContext().getSegment(previousResultKey)); // tableIndexing for the last unit in previous segment
         }
-        while (true) { // re
+        while (true) {
             SegmentReadResult result;
             try {
                 result = in.readDbUnit();
