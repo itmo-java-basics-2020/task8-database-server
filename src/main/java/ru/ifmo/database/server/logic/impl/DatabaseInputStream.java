@@ -11,6 +11,14 @@ public class DatabaseInputStream extends DataInputStream {
     }
 
     public Optional<DatabaseStoringUnit> readDbUnit() throws IOException {
-        throw new UnsupportedOperationException(); // todo implement
+        int keySize = super.readInt();
+        byte[] key = new byte[keySize];
+        super.read(key);
+
+        int valueSize = super.readInt();
+        byte[] value = new byte[valueSize];
+        super.read(value);
+
+        return Optional.of(new DatabaseStoringUnit(key, value));
     }
 }

@@ -1,11 +1,62 @@
 package ru.ifmo.database.server.console;
 
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 
 public interface DatabaseCommandResult {
 
+    static DatabaseCommandResult success(String result) {
+        return new DatabaseCommandResultImpl(DatabaseCommandStatus.SUCCESS, result, null);
+    }
+
+    static DatabaseCommandResult error(String message) {
+        return new DatabaseCommandResultImpl(DatabaseCommandStatus.FAILED, null, message);
+    }
+
+    Optional<String> getResult();
+
+    DatabaseCommandStatus getStatus();
+
+    boolean isSuccess();
+
+    String getErrorMessage();
+
+    enum DatabaseCommandStatus {
+        SUCCESS, FAILED
+    }
+
+    class DatabaseCommandResultImpl implements DatabaseCommandResult {
+        private final DatabaseCommandStatus status;
+        private final String result;
+        private final String message;
+
+        private DatabaseCommandResultImpl(DatabaseCommandStatus status, String result, String message) {
+            this.status = status;
+            this.result = result;
+            this.message = message;
+        }
+
+        @Override
+        public Optional<String> getResult() {
+            return Optional.ofNullable(this.result);
+        }
+
+        @Override
+        public DatabaseCommandStatus getStatus() {
+            return this.status;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return this.status == DatabaseCommandStatus.SUCCESS;
+        }
+
+        @Override
+        public String getErrorMessage() {
+            return this.message;
+        }
+    }
+
+    /*
     static DatabaseCommandResult success(String result) {
         Objects.requireNonNull(result);
         return new DatabaseCommandResultImpl(result, null, DatabaseCommandStatus.SUCCESS);
@@ -66,5 +117,5 @@ public interface DatabaseCommandResult {
         public Optional<String> getResult() {
             return Optional.ofNullable(result);
         }
-    }
+    }*/
 }

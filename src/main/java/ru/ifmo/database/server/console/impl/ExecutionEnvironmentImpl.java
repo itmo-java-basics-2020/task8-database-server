@@ -1,8 +1,11 @@
 package ru.ifmo.database.server.console.impl;
 
 import ru.ifmo.database.server.console.ExecutionEnvironment;
+import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.logic.Database;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +23,9 @@ public class ExecutionEnvironmentImpl implements ExecutionEnvironment {
     }
 
     public ExecutionEnvironmentImpl(Path workingPath) {
+        try {
+            Files.createDirectory(workingPath);
+        } catch(IOException ex) {}
         this.workingPath = Objects.requireNonNull(workingPath);
     }
 

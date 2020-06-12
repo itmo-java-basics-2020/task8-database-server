@@ -8,32 +8,40 @@ import java.nio.file.Path;
 
 public class TableInitializationContextImpl implements TableInitializationContext {
 
+    private final String name;
+    private final Path path;
+    private final TableIndex index;
+    private Segment currentSegment;
+
     public TableInitializationContextImpl(String tableName, Path databasePath, TableIndex tableIndex) {
-        throw new UnsupportedOperationException(); // todo implement
+        this.name = tableName;
+        this.path = Path.of(databasePath.toString(), tableName);
+        this.index = tableIndex;
+        this.currentSegment = null;
     }
 
     @Override
     public String getTableName() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.name;
     }
 
     @Override
     public Path getTablePath() {
-        throw new UnsupportedOperationException(); // todo implement
+        return path;
     }
 
     @Override
     public TableIndex getTableIndex() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.index;
     }
 
     @Override
     public Segment getCurrentSegment() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.currentSegment;
     }
 
     @Override
     public void updateCurrentSegment(Segment segment) {
-        throw new UnsupportedOperationException(); // todo implement
+        this.currentSegment = segment;
     }
 }

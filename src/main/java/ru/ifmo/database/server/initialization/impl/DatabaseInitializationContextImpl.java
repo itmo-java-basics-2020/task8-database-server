@@ -6,33 +6,37 @@ import ru.ifmo.database.server.logic.Table;
 
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Map;
 
 @Getter
 public class DatabaseInitializationContextImpl implements DatabaseInitializationContext {
 
+    private final String dbName;
+    private final Path dbRoot;
+    private HashMap<String, Table> tables;
 
     public DatabaseInitializationContextImpl(String dbName, Path databaseRoot) {
-        throw new UnsupportedOperationException(); // todo implement
+        this.dbName = dbName;
+        this.dbRoot = databaseRoot;
+        this.tables = new HashMap<>();
     }
 
     @Override
     public String getDbName() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.dbName;
     }
 
     @Override
     public Path getDatabasePath() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.dbRoot;
     }
 
     @Override
-    public Map<String, Table> getTables() {
-        throw new UnsupportedOperationException(); // todo implement
+    public HashMap<String, Table> getTables() {
+        return this.tables;
     }
 
     @Override
     public void addTable(Table table) {
-        throw new UnsupportedOperationException(); // todo implement
+        this.tables.put(table.getName(), table);
     }
 }
