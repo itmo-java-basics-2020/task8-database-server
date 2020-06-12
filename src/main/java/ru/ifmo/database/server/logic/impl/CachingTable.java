@@ -28,6 +28,7 @@ public class CachingTable implements Table {
     @Override
     public void write(String objectKey, String objectValue) throws DatabaseException {
         this.table.write(objectKey, objectValue);
+        cache.set(objectKey, objectValue);
     }
 
     @Override
