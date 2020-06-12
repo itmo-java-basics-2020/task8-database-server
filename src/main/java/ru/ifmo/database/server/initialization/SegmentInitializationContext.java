@@ -11,5 +11,6 @@ public interface SegmentInitializationContext {
 
     SegmentIndex getIndex();
 
-    int getCurrentSize(); // todo sukhoa should be long
+    long getCurrentSize();
+
 }

@@ -4,7 +4,7 @@ import ru.ifmo.database.server.console.impl.CreateDatabaseCommand;
 import ru.ifmo.database.server.console.impl.CreateTableCommand;
 import ru.ifmo.database.server.console.impl.ReadKeyCommand;
 import ru.ifmo.database.server.console.impl.UpdateKeyCommand;
-import com.ifmo.database.server.logic.impl.DatabaseImpl;
+import ru.ifmo.database.server.logic.impl.DatabaseImpl;
 
 public enum DatabaseCommands {
 
