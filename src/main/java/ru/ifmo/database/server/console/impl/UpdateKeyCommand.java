@@ -35,6 +35,6 @@ public class UpdateKeyCommand implements DatabaseCommand {
         }
         String prevValue = database.get().read(tableName, key);
         database.get().write(tableName, key, value);
-        return DatabaseCommandResult.success(prevValue);
+        return DatabaseCommandResult.success(prevValue == null ? "" : prevValue);
     }
 }

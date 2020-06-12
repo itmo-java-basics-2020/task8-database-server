@@ -6,28 +6,41 @@ import ru.ifmo.database.server.initialization.SegmentInitializationContext;
 import java.nio.file.Path;
 
 public class SegmentInitializationContextImpl implements SegmentInitializationContext {
+    private final String segmentName;
+    private final Path segmentPath;
+    private final int currentSize;
+    private final SegmentIndex index;
+    private final boolean isReadOnly;
 
-    private SegmentInitializationContextImpl(String segmentName, Path segmentPath, int currentSize, SegmentIndex index) {
-        throw new UnsupportedOperationException(); // todo implement
+    public SegmentInitializationContextImpl(String segmentName, Path segmentPath, int currentSize, SegmentIndex index, boolean isReadOnly) {
+        this.segmentName = segmentName;
+        this.segmentPath = segmentPath;
+        this.currentSize = currentSize;
+        this.index = index;
+        this.isReadOnly = isReadOnly;
     }
 
     @Override
     public String getSegmentName() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.segmentName;
     }
 
     @Override
     public Path getSegmentPath() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.segmentPath;
     }
 
     @Override
     public SegmentIndex getIndex() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.index;
     }
 
     @Override
     public int getCurrentSize() {
-        throw new UnsupportedOperationException(); // todo implement
+        return this.currentSize;
+    }
+
+    public boolean isReadOnly() {
+        return this.isReadOnly;
     }
 }

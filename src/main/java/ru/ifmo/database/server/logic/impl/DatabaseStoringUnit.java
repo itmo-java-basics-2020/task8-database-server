@@ -4,7 +4,6 @@ public class DatabaseStoringUnit {
 
     private final byte[] key;
     private final int keySize;
-
     private final byte[] value;
     private final int valueSize;
 
@@ -14,8 +13,28 @@ public class DatabaseStoringUnit {
 
     public DatabaseStoringUnit(byte[] key, byte[] value) {
         this.key = key;
-        keySize = key.length;
+        this.keySize = key.length;
         this.value = value;
-        valueSize = value.length;
+        this.valueSize = value.length;
+    }
+
+    public int getKeySize() {
+        return this.keySize;
+    }
+
+    public byte[] getValue() {
+        return this.value;
+    }
+
+    public int getValueSize() {
+        return this.valueSize;
+    }
+
+    public byte[] getKey() {
+        return this.key;
+    }
+
+    public int getUnitSize() {
+        return 8 + this.keySize + this.valueSize;
     }
 }
