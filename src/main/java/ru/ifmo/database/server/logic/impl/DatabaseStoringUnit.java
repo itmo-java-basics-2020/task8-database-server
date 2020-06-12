@@ -13,21 +13,21 @@ public class DatabaseStoringUnit {
 
     public DatabaseStoringUnit(byte[] key, byte[] value) {
         this.key = key;
-        keySize = key.length;
+        this.keySize = key.length;
         this.value = value;
-        valueSize = value.length;
+        this.valueSize = value.length;
     }
 
     public int getKeySize() {
-        return keySize;
+        return this.keySize;
     }
 
     public byte[] getValue() {
-        return value;
+        return this.value;
     }
 
     public int getValueSize() {
-        return valueSize;
+        return this.valueSize;
     }
 
     public byte[] getKey() {

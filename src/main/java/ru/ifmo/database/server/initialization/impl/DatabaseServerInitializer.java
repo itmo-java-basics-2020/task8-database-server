@@ -1,11 +1,11 @@
 package ru.ifmo.database.server.initialization.impl;
 
+import ru.ifmo.database.server.console.ExecutionEnvironment;
 import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.initialization.InitializationContext;
 import ru.ifmo.database.server.initialization.Initializer;
 
 import java.io.File;
-import java.nio.file.Path;
 
 public class DatabaseServerInitializer implements Initializer {
 
@@ -18,24 +18,27 @@ public class DatabaseServerInitializer implements Initializer {
 
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
-        if (context.executionEnvironment() == null) {
-            throw new DatabaseException("Execution environment skipped context during initialization");
+        ExecutionEnvironment executionEnvironment = context.executionEnvironment();
+        if (executionEnvironment == null) {
+            throw new DatabaseException("Execution environment is null");
         }
 
-        File dbServerDir = new File(context.executionEnvironment().getWorkingPath().toString());
-        String[] directories = dbServerDir.list((current, name) -> new File(current, name).isDirectory());
+        File dbServerDir = executionEnvironment.getWorkingPath().toFile();
 
-        if (directories == null) {
+        if (dbServerDir.listFiles() == null) {
             return;
         }
 
-        for (String directory : directories) {
-            InitializationContextImpl initializationContext = InitializationContextImpl.builder()
-                    .executionEnvironment(context.executionEnvironment())
-                    .currentDatabaseContext(new DatabaseInitializationContextImpl(directory,
-                            Path.of(context.executionEnvironment().getWorkingPath().toString() + "/" + directory)))
-                    .build();
-            this.databaseInitializer.perform(initializationContext);
+        for (File directory : dbServerDir.listFiles()) {
+            if (directory.isDirectory()) {
+                this.databaseInitializer.perform(InitializationContextImpl.builder()
+                        .executionEnvironment(executionEnvironment)
+                        .currentDatabaseContext(
+                                new DatabaseInitializationContextImpl(
+                                        directory.getName(),
+                                        directory.toPath()))
+                        .build());
+            }
         }
     }
 }

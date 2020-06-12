@@ -19,22 +19,22 @@ public class CachingTable implements Table {
 
     @Override
     public String getName() {
-        return table.getName();
+        return this.table.getName();
     }
 
     @Override
     public void write(String objectKey, String objectValue) throws DatabaseException {
-        cache.set(objectKey, objectValue);
-        table.write(objectKey, objectValue);
+        this.cache.set(objectKey, objectValue);
+        this.table.write(objectKey, objectValue);
     }
 
     @Override
     public String read(String objectKey) throws DatabaseException {
-        String objectValue = cache.get(objectKey);
+        String objectValue = this.cache.get(objectKey);
 
         if (objectValue == null) {
-            String nonCacheValue = table.read(objectKey);
-            cache.set(objectKey, nonCacheValue);
+            String nonCacheValue = this.table.read(objectKey);
+            this.cache.set(objectKey, nonCacheValue);
             return nonCacheValue;
         }
 

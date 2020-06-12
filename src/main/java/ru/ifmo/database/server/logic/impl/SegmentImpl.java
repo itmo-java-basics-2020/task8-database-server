@@ -21,7 +21,7 @@ import java.util.Optional;
  * - является неизменяемым после появления более нового сегмента
  */
 public class SegmentImpl implements Segment {
-    public static final int DEFAUL_SIZE = 100_000;
+    public static final int DEFAULT_SIZE = 1000;
 
     private final String segmentName;
     private final Path tableRootPath;
@@ -65,29 +65,30 @@ public class SegmentImpl implements Segment {
     }
 
     @Override
-    public boolean write(String objectKey, String objectValue) throws IOException, DatabaseException {
+    public boolean write(String objectKey, String objectValue) throws IOException {
         DatabaseStoringUnit unit = new DatabaseStoringUnit(objectKey, objectValue);
 
-        if (unit.getUnitSize() + size > DEFAUL_SIZE) {
+        if (unit.getUnitSize() + this.size > DEFAULT_SIZE) {
             this.isReadOnly = true;
             return false;
         }
 
-        DatabaseOutputStream dbOutputStream = new DatabaseOutputStream(new FileOutputStream(new File(tableRootPath.toString()), true));
+        DatabaseOutputStream dbOutputStream = new DatabaseOutputStream(
+                new FileOutputStream(new File(this.tableRootPath.toString()), true));
         this.size += dbOutputStream.write(unit);
         return true;
     }
 
     @Override
-    public String read(String objectKey) throws IOException, DatabaseException {
-        Optional<SegmentIndexInfo> offset = index.searchForKey(objectKey);
+    public String read(String objectKey) throws DatabaseException {
+        Optional<SegmentIndexInfo> offset = this.index.searchForKey(objectKey);
 
         if (offset.isEmpty()) {
             return null;
         }
 
-        try {
-            DatabaseInputStream dbInputStream = new DatabaseInputStream(new FileInputStream(new File(tableRootPath.toString())));
+        try (DatabaseInputStream dbInputStream = new DatabaseInputStream(
+                new FileInputStream(new File(this.tableRootPath.toString())))) {
 
             Optional<DatabaseStoringUnit> dbUnit = dbInputStream.readDbUnit((int) offset.get().getOffset());
 

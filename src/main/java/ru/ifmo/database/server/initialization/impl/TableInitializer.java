@@ -4,12 +4,10 @@ import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.index.impl.SegmentIndex;
 import ru.ifmo.database.server.initialization.InitializationContext;
 import ru.ifmo.database.server.initialization.Initializer;
-import ru.ifmo.database.server.logic.impl.SegmentImpl;
+import ru.ifmo.database.server.initialization.TableInitializationContext;
 import ru.ifmo.database.server.logic.impl.TableImpl;
 
 import java.io.File;
-import java.io.FilenameFilter;
-import java.nio.file.Path;
 
 public class TableInitializer implements Initializer {
 
@@ -21,37 +19,34 @@ public class TableInitializer implements Initializer {
 
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
-        if (context.currentSegmentContext() == null) {
-            throw new DatabaseException("Segment skipped context during initialization");
+        TableInitializationContext tableContext = context.currentTableContext();
+        if (tableContext == null) {
+            throw new DatabaseException("Table context is null");
         }
 
-        File file = new File(context.currentTableContext().getTablePath().toString());
-        String[] segments = file.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File current, String name) {
-                return new File(current, name).isFile();
-            }
-        });
+        File tableDirectory = tableContext.getTablePath().toFile();
 
-        if (segments == null) {
+        if (tableDirectory.listFiles() == null) {
             return;
         }
 
-        for (String segment : segments) {
-            context.currentTableContext().updateCurrentSegment(SegmentImpl.create(segment,
-                    context.currentTableContext().getTablePath()));
-            InitializationContextImpl initializationContext = InitializationContextImpl.builder()
-                    .executionEnvironment(context.executionEnvironment())
-                    .currentDatabaseContext(context.currentDbContext())
-                    .currentTableContext(context.currentTableContext())
-                    .currentSegmentContext(new SegmentInitializationContextImpl(segment,
-                            Path.of(context.currentTableContext().getTablePath().toString()),
-                            (int) new File(context.currentTableContext().getTablePath().toString() + "\\" + segment).length(),
-                            new SegmentIndex(), false))
-                    .build();
-            segmentInitializer.perform(initializationContext);
+        for (File segment : tableDirectory.listFiles()) {
+            if (segment.isFile()) {
+                this.segmentInitializer.perform(InitializationContextImpl.builder()
+                        .executionEnvironment(context.executionEnvironment())
+                        .currentDatabaseContext(context.currentDbContext())
+                        .currentTableContext(tableContext)
+                        .currentSegmentContext(
+                                new SegmentInitializationContextImpl(
+                                        segment.getName(),
+                                        segment.toPath(),
+                                        (int) segment.length(),
+                                        new SegmentIndex(),
+                                        segment.canRead()))
+                        .build());
+            }
         }
         context.currentDbContext()
-                .addTable(TableImpl.initializeFromContext(context.currentTableContext()));
+                .addTable(TableImpl.initializeFromContext(tableContext));
     }
 }
