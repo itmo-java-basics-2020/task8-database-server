@@ -4,13 +4,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class DatabaseCache implements Cache {
+    private static final int DEFAULT_CACHE_CAPACITY = 1322;
+
     private final LinkedHashMap<String, String> lruMap;
 
-    public DatabaseCache(int capacity) {
-        this.lruMap = new LinkedHashMap<>(capacity, 1, true) {
+    public DatabaseCache() {
+        this.lruMap = new LinkedHashMap<>(DEFAULT_CACHE_CAPACITY, 1, true) {
             @Override
             protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
-                return size() > capacity;
+                return size() > DEFAULT_CACHE_CAPACITY;
             }
         };
     }
