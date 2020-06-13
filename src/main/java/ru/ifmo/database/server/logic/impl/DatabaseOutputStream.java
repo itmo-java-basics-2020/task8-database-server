@@ -10,15 +10,12 @@ public class DatabaseOutputStream extends DataOutputStream {
     }
 
     int write(DatabaseStoringUnit storingUnit) throws IOException {
-        writeInt(storingUnit.getKeySize());
-        for (byte b : storingUnit.getKey()) {
-            writeByte(b);
-        }
 
+        writeInt(storingUnit.getKeySize());
+        write(storingUnit.getKey());
         writeInt(storingUnit.getValueSize());
-        for (byte b : storingUnit.getValue()) {
-            writeByte(b);
-        }
-        return (storingUnit.getKeySize() + storingUnit.getValueSize());
+        write(storingUnit.getValue());
+
+        return (4 + storingUnit.getKeySize() + 4 + storingUnit.getValueSize());
     }
 }

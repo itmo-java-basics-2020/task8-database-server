@@ -1,6 +1,7 @@
 package ru.ifmo.database.server.logic.impl;
 
 import ru.ifmo.database.server.exception.DatabaseException;
+import ru.ifmo.database.server.index.SegmentIndexInfo;
 import ru.ifmo.database.server.index.impl.SegmentIndex;
 import ru.ifmo.database.server.initialization.SegmentInitializationContext;
 import ru.ifmo.database.server.initialization.impl.SegmentInitializationContextImpl;
@@ -40,11 +41,11 @@ public class SegmentImpl implements Segment {
 
     static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
         try {
-            Files.createFile(Path.of(tableRootPath.toString(), segmentName));
+            Files.createFile(tableRootPath.resolve(segmentName));
         } catch (IOException e) {
             throw new DatabaseException(String.format("Segment \"%s\" already exists", segmentName));
         }
-        SegmentInitializationContext context = new SegmentInitializationContextImpl(segmentName, Paths.get(tableRootPath + segmentName), 0, new SegmentIndex());
+        SegmentInitializationContext context = new SegmentInitializationContextImpl(segmentName, Paths.get(tableRootPath + "\\" + segmentName), 0, new SegmentIndex());
         return new SegmentImpl(context);
     }
 
@@ -60,13 +61,12 @@ public class SegmentImpl implements Segment {
     @Override
     public boolean write(String objectKey, String objectValue) throws IOException, DatabaseException {
         try {
-            int indexOffset = (int) Files.size(Files.createFile(Paths.get(tableRootPath + segmentName)));
             DatabaseStoringUnit databaseStoringUnit = new DatabaseStoringUnit(objectKey, objectValue);
             if (databaseStoringUnit.getValueSize() + databaseStoringUnit.getKeySize() + currentSize > FIXED_SIZE) {
                 isReadOnly = true;
                 return false;
             }
-            return (new DatabaseOutputStream((new FileOutputStream(Paths.get(tableRootPath + segmentName).toString()))).write(databaseStoringUnit)) == 1;
+            return (new DatabaseOutputStream((new FileOutputStream((tableRootPath).toString()))).write(databaseStoringUnit)) == 1;
         } catch (IOException e) {
             throw new DatabaseException(String.format("Segment \"%s\" does not exist", segmentName));
         }
@@ -74,10 +74,10 @@ public class SegmentImpl implements Segment {
 
     @Override
     public String read(String objectKey) throws DatabaseException {
-        int indexOffset = (int) index.getSegmentIndexInfo(objectKey).getOffset();
+        Optional<SegmentIndexInfo> indexOffset = index.searchForKey(objectKey);
         try {
-            DatabaseInputStream databaseInputStream = new DatabaseInputStream(new FileInputStream(Paths.get(tableRootPath + segmentName).toString()));
-            Optional<DatabaseStoringUnit> databaseStoringUnit = databaseInputStream.readDbUnit(indexOffset);
+            DatabaseInputStream databaseInputStream = new DatabaseInputStream(new FileInputStream(Path.of(String.valueOf(tableRootPath)).toString()));
+            Optional<DatabaseStoringUnit> databaseStoringUnit = databaseInputStream.readDbUnit((int) indexOffset.get().getOffset());
             return new String(databaseStoringUnit.get().getValue());
         } catch (DatabaseException e) {
             throw new DatabaseException("DbUnit reading error");

@@ -39,7 +39,7 @@ public class TableImpl implements Table {
         this.pathToDatabaseRoot = pathToDatabaseRoot;
 
         try {
-            Files.createDirectory(Path.of(pathToDatabaseRoot.toString(), tablename));
+            Files.createDirectories(Path.of(pathToDatabaseRoot.toString(), tablename));
         } catch (IOException e) {
             throw new DatabaseException(String.format("Table \"%s\" already exists", tablename));
         }

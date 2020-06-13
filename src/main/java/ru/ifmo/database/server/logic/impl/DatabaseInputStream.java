@@ -18,21 +18,11 @@ public class DatabaseInputStream extends DataInputStream {
 
             int keySize = readInt();
             byte[] key = new byte[keySize];
+            readNBytes(key, 0, keySize);
 
             int valueSize = readInt();
             byte[] value = new byte[valueSize];
-
-            try {
-                for (int i = 0; i < keySize; i++) {
-                    key[i] = readByte();
-                }
-
-                for (int i = 0; i < valueSize; i++) {
-                    value[i] = readByte();
-                }
-            } catch (IOException e) {
-                throw new IOException(e);
-            }
+            readNBytes(value, 0, valueSize);
 
             return Optional.of(new DatabaseStoringUnit(key, value));
         } catch (IOException e) {

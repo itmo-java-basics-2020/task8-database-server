@@ -24,7 +24,7 @@ public class DatabaseImpl implements Database {
         return new DatabaseImpl(dbName, databaseRoot);
     }
 
-    public static Database initializeFromContext(DatabaseInitializationContext context) throws DatabaseException{
+    public static Database initializeFromContext(DatabaseInitializationContext context) throws DatabaseException {
         return new DatabaseImpl(context);
     }
 
@@ -34,12 +34,13 @@ public class DatabaseImpl implements Database {
         this.dbRoot = databaseRoot;
         this.dbTables = new HashMap<>();
 
-        try {
-            Files.createFile(Path.of(databaseRoot + dbName));
-        } catch (IOException e) {
-            throw new DatabaseException(String.format("Database \"%s\" already exists", dbName));
-        }
-
+        if (!(Files.exists(Path.of(databaseRoot.toString(), dbName)) || dbName.contains("/"))) {
+            try{Files.createDirectories(Path.of(databaseRoot.toString(), dbName));}
+            catch (IOException e){
+                throw new DatabaseException("Database error");
+            }
+        } else
+            throw new DatabaseException("Database error");
     }
 
     private DatabaseImpl(DatabaseInitializationContext context) throws DatabaseException {
@@ -59,7 +60,7 @@ public class DatabaseImpl implements Database {
             if (dbTables.containsKey(tableName)) {
                 throw new DatabaseException("Table already exist");
             }
-            Table newTable = TableImpl.create(tableName, dbRoot, new TableIndex());
+            Table newTable = TableImpl.create(tableName, Path.of(dbRoot + "\\" + dbName), new TableIndex());
             dbTables.put(tableName, newTable);
         } catch (DatabaseException e) {
             throw new DatabaseException(e);
@@ -83,11 +84,11 @@ public class DatabaseImpl implements Database {
 
     @Override
     public String read(String tableName, String objectKey) throws DatabaseException {
-        String value = tableCache.get(objectKey);
-        if (value == null) {
-            value = dbTables.get(tableName).read(objectKey);
-            tableCache.set(objectKey, value);
+        if (!dbTables.containsKey(tableName)) {
+            throw new DatabaseException("No such table");
         }
+        String value = dbTables.get(tableName).read(objectKey);
+        tableCache.set(objectKey, value);
         return value;
     }
 }
