@@ -93,7 +93,7 @@ public class CacheTest {
 
     @Test
     public void test_cache() {
-        DatabaseCache cache = new DatabaseCache(1000);
+        DatabaseCache cache = new DatabaseCache();
         String key = "testKey";
         List<String> values = List.of("testValue1", "testValue2", "");
 
