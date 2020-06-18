@@ -35,6 +35,7 @@ public class ExecutionEnvironmentImpl implements ExecutionEnvironment {
 
     @Override
     public Path getWorkingPath() {
+        System.out.println(workingPath);
         return workingPath;
     }
 }

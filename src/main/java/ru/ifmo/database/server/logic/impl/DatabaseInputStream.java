@@ -1,5 +1,7 @@
 package ru.ifmo.database.server.logic.impl;
 
+import ru.ifmo.database.server.exception.DatabaseException;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +12,19 @@ public class DatabaseInputStream extends DataInputStream {
         super(inputStream);
     }
 
-    public Optional<DatabaseStoringUnit> readDbUnit() throws IOException {
-        throw new UnsupportedOperationException(); // todo implement
+    public Optional<DatabaseStoringUnit> readDbUnit() throws DatabaseException {
+        try {
+            int keySize = readInt();
+            byte[] key = new byte[keySize];
+            readNBytes(key, 0, keySize);
+
+            int valueSize = readInt();
+            byte[] value = new byte[valueSize];
+            readNBytes(value, 0, valueSize);
+
+            return Optional.of(new DatabaseStoringUnit(key, value));
+        } catch (IOException e) {
+            throw new DatabaseException("Unexpected error with InputStream");
+        }
     }
 }

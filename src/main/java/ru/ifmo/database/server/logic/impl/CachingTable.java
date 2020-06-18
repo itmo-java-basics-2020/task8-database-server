@@ -5,26 +5,46 @@ import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.logic.Table;
 
 public class CachingTable implements Table {
+    private final Table table;
+    private final DatabaseCache cache;
+
     public CachingTable(Table table) {
-        throw new UnsupportedOperationException(); // todo implement
+        this.table = table;
+        this.cache = new DatabaseCache();
     }
 
     public CachingTable(Table table, DatabaseCache cache) {
-        throw new UnsupportedOperationException(); // todo implement
+        this.table = table;
+        this.cache = cache;
     }
 
     @Override
     public String getName() {
-        throw new UnsupportedOperationException(); // todo implement
+        return table.getName();
     }
 
     @Override
     public void write(String objectKey, String objectValue) throws DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
+        try {
+            cache.set(objectKey, objectValue);
+            table.write(objectKey, objectValue);
+        } catch (DatabaseException e) {
+            throw new DatabaseException(e);
+        }
     }
 
     @Override
     public String read(String objectKey) throws DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
+        String val = cache.get(objectKey);
+        try {
+            if (val == null) {
+                String nonCacheValue = table.read(objectKey);
+                cache.set(objectKey, nonCacheValue);
+                return nonCacheValue;
+            }
+        } catch (DatabaseException e) {
+            throw new DatabaseException(e);
+        }
+        return val;
     }
 }
