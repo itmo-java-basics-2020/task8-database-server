@@ -3,16 +3,19 @@ package ru.ifmo.database.server.logic.impl;
 import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.index.SegmentIndexInfo;
 import ru.ifmo.database.server.index.impl.SegmentIndex;
+import ru.ifmo.database.server.index.impl.SegmentIndexInfoImpl;
 import ru.ifmo.database.server.initialization.SegmentInitializationContext;
-import ru.ifmo.database.server.initialization.impl.SegmentInitializationContextImpl;
+import ru.ifmo.database.server.logic.Database;
 import ru.ifmo.database.server.logic.Segment;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.Channels;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
 /**
@@ -32,22 +35,34 @@ public class SegmentImpl implements Segment {
     private boolean isReadOnly;
     private int currentSize;
 
-    public SegmentImpl(SegmentInitializationContext context) {
+    static Segment create(String segmentName, Path tableRootPath, SegmentIndex index) throws DatabaseException {
+        return new SegmentImpl(segmentName, tableRootPath, index, 0);
+    }
+
+    public static Segment initializeFromContext(SegmentInitializationContext context) throws DatabaseException {
+        return new SegmentImpl(context);
+    }
+
+    private SegmentImpl(String segmentName, Path tableRootPath, SegmentIndex index, int currentSize) throws DatabaseException {
+        this.segmentName = segmentName;
+        this.tableRootPath = tableRootPath;
+        this.index = index;
+        this.currentSize = currentSize;
+
+        try {
+            Files.createFile(tableRootPath.resolve(segmentName));
+        } catch (IOException e) {
+            throw new DatabaseException(String.format("Segment \"%s\" already exists", segmentName));
+        }
+    }
+
+    private SegmentImpl(SegmentInitializationContext context) throws DatabaseException {
         this.segmentName = context.getSegmentName();
         this.tableRootPath = context.getSegmentPath();
         this.index = context.getIndex();
         this.currentSize = context.getCurrentSize();
     }
 
-    static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
-        try {
-            Files.createFile(tableRootPath.resolve(segmentName));
-        } catch (IOException e) {
-            throw new DatabaseException(String.format("Segment \"%s\" already exists", segmentName));
-        }
-        SegmentInitializationContext context = new SegmentInitializationContextImpl(segmentName, Paths.get(tableRootPath + "\\" + segmentName), 0, new SegmentIndex());
-        return new SegmentImpl(context);
-    }
 
     static String createSegmentName(String tableName) {
         return tableName + "_" + System.currentTimeMillis();
@@ -66,19 +81,36 @@ public class SegmentImpl implements Segment {
                 isReadOnly = true;
                 return false;
             }
-            return (new DatabaseOutputStream((new FileOutputStream((tableRootPath).toString()))).write(databaseStoringUnit)) == 1;
+
+            SeekableByteChannel byteChannel = Files.newByteChannel(tableRootPath.resolve(segmentName), StandardOpenOption.APPEND);
+            DatabaseOutputStream outputStream = new DatabaseOutputStream(Channels.newOutputStream(byteChannel));
+
+            outputStream.write(databaseStoringUnit);
+
+            var startPosition = byteChannel.position();
+            index.onIndexedEntityUpdated(objectKey, new SegmentIndexInfoImpl(startPosition));
+
         } catch (IOException e) {
             throw new DatabaseException(String.format("Segment \"%s\" does not exist", segmentName));
         }
+        return true;
     }
 
     @Override
     public String read(String objectKey) throws DatabaseException {
         Optional<SegmentIndexInfo> indexOffset = index.searchForKey(objectKey);
+
+        if (indexOffset.isEmpty()) {
+            throw new DatabaseException("There is no such key");
+        }
         try {
-            DatabaseInputStream databaseInputStream = new DatabaseInputStream(new FileInputStream(Path.of(String.valueOf(tableRootPath)).toString()));
-            Optional<DatabaseStoringUnit> databaseStoringUnit = databaseInputStream.readDbUnit((int) indexOffset.get().getOffset());
-            return new String(databaseStoringUnit.get().getValue());
+            SeekableByteChannel byteChannel = Files.newByteChannel(tableRootPath.resolve(segmentName), StandardOpenOption.READ);
+            DatabaseInputStream in = new DatabaseInputStream(Channels.newInputStream(byteChannel));
+
+            byteChannel.position(indexOffset.get().getOffset());
+
+            DatabaseStoringUnit databaseStoringUnit = in.readDbUnit().orElseThrow(() -> new IllegalStateException("Not enough bytes"));
+            return new String(databaseStoringUnit.getValue());
         } catch (DatabaseException e) {
             throw new DatabaseException("DbUnit reading error");
         } catch (IOException e1) {

@@ -2,6 +2,7 @@ package ru.ifmo.database.server.logic.impl;
 
 import ru.ifmo.database.server.exception.DatabaseException;
 import ru.ifmo.database.server.index.impl.TableIndex;
+import ru.ifmo.database.server.index.impl.SegmentIndex;
 import ru.ifmo.database.server.initialization.TableInitializationContext;
 import ru.ifmo.database.server.logic.Segment;
 import ru.ifmo.database.server.logic.Table;
@@ -9,6 +10,7 @@ import ru.ifmo.database.server.logic.Table;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Files;
+
 /**
  * Таблица - логическая сущность, представляющая собой набор файлов-сегментов, которые объединены одним
  * именем и используются для хранения однотипных данных (данных, представляющих собой одну и ту же сущность,
@@ -44,7 +46,7 @@ public class TableImpl implements Table {
             throw new DatabaseException(String.format("Table \"%s\" already exists", tablename));
         }
 
-        this.currentSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tablename), Path.of(pathToDatabaseRoot.toString(), tablename));
+        this.currentSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tablename), pathToDatabaseRoot.resolve(tablename), new SegmentIndex());
     }
 
     private TableImpl(TableInitializationContext context) {
@@ -64,19 +66,20 @@ public class TableImpl implements Table {
         try {
             currentSegment.write(objectKey, objectValue);
             tableIndex.updateSegment(objectKey, currentSegment);
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new DatabaseException(e);
         }
     }
 
     @Override
     public String read(String objectKey) throws DatabaseException {
-        try{
-        if (!tableIndex.ifContains(objectKey)) {
-            throw new DatabaseException("There is no such key");
-        } else {
-            return tableIndex.getSegment(objectKey).read(objectKey);
-        }} catch (IOException e){
+        try {
+            if (!tableIndex.ifContains(objectKey)) {
+                throw new DatabaseException("There is no such key");
+            } else {
+                return tableIndex.getSegment(objectKey).read(objectKey);
+            }
+        } catch (IOException e) {
             throw new DatabaseException(e);
         }
     }

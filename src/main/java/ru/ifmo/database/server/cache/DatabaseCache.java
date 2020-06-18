@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class DatabaseCache implements Cache {
-    private static final int DEFAULT_CACHE_CAPACITY = 1322;
+    private static final int DEFAULT_CACHE_CAPACITY = 100000;
 
     private final LinkedHashMap<String, String> lruMap;
 

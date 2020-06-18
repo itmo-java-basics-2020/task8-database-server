@@ -9,19 +9,19 @@ import java.util.Map;
 public class SegmentIndex extends AbstractDatabaseIndex<String, SegmentIndexInfo> {
     private final Map<String, SegmentIndexInfo> segmentIndexMap;
 
-    public SegmentIndex(){
+    public SegmentIndex() {
         this.segmentIndexMap = new HashMap<>();
     }
 
-    public void updateSegmentIndexMap(String objectKey, int offset){
+    public void updateSegmentIndexMap(String objectKey, int offset) {
         segmentIndexMap.put(objectKey, new SegmentIndexInfoImpl(offset));
     }
 
-    public boolean isContains(String objectKey){
+    public boolean isContains(String objectKey) {
         return segmentIndexMap.containsKey(objectKey);
     }
 
-    public SegmentIndexInfo getSegmentIndexInfo(String objectKey){
+    public SegmentIndexInfo getSegmentIndexInfo(String objectKey) {
         return segmentIndexMap.get(objectKey);
     }
 }

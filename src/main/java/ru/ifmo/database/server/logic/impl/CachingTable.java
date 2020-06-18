@@ -10,7 +10,7 @@ public class CachingTable implements Table {
 
     public CachingTable(Table table) {
         this.table = table;
-        this.cache = new DatabaseCache(100);
+        this.cache = new DatabaseCache();
     }
 
     public CachingTable(Table table, DatabaseCache cache) {
@@ -28,7 +28,7 @@ public class CachingTable implements Table {
         try {
             cache.set(objectKey, objectValue);
             table.write(objectKey, objectValue);
-        } catch (DatabaseException e){
+        } catch (DatabaseException e) {
             throw new DatabaseException(e);
         }
     }
@@ -42,7 +42,7 @@ public class CachingTable implements Table {
                 cache.set(objectKey, nonCacheValue);
                 return nonCacheValue;
             }
-        } catch (DatabaseException e){
+        } catch (DatabaseException e) {
             throw new DatabaseException(e);
         }
         return val;

@@ -28,7 +28,7 @@ public class TableInitializer implements Initializer {
             InitializationContext init = new InitializationContextImpl(context.executionEnvironment(),
                     context.currentDbContext(),
                     context.currentTableContext(),
-                    new SegmentInitializationContextImpl(seg.getName(), seg.toPath(), (int)seg.length(), new SegmentIndex()));
+                    new SegmentInitializationContextImpl(seg.getName(), seg.toPath(), (int) seg.length(), new SegmentIndex()));
 
             segmentInitializer.perform(init);
         }

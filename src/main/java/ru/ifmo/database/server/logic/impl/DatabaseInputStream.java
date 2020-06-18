@@ -12,10 +12,8 @@ public class DatabaseInputStream extends DataInputStream {
         super(inputStream);
     }
 
-    public Optional<DatabaseStoringUnit> readDbUnit(int offSet) throws DatabaseException {
+    public Optional<DatabaseStoringUnit> readDbUnit() throws DatabaseException {
         try {
-            skipNBytes(offSet);
-
             int keySize = readInt();
             byte[] key = new byte[keySize];
             readNBytes(key, 0, keySize);

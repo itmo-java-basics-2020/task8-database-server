@@ -18,7 +18,7 @@ public class DatabaseImpl implements Database {
     private final String dbName;
     private final Path dbRoot;
     private final Map<String, Table> dbTables;
-    private final DatabaseCache tableCache = new DatabaseCache(100);
+    private final DatabaseCache tableCache = new DatabaseCache();
 
     public static Database create(String dbName, Path databaseRoot) throws DatabaseException {
         return new DatabaseImpl(dbName, databaseRoot);
@@ -35,8 +35,9 @@ public class DatabaseImpl implements Database {
         this.dbTables = new HashMap<>();
 
         if (!(Files.exists(Path.of(databaseRoot.toString(), dbName)) || dbName.contains("/"))) {
-            try{Files.createDirectories(Path.of(databaseRoot.toString(), dbName));}
-            catch (IOException e){
+            try {
+                Files.createDirectories(Path.of(databaseRoot.toString(), dbName));
+            } catch (IOException e) {
                 throw new DatabaseException("Database error");
             }
         } else

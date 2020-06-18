@@ -16,6 +16,6 @@ public class DatabaseOutputStream extends DataOutputStream {
         writeInt(storingUnit.getValueSize());
         write(storingUnit.getValue());
 
-        return (4 + storingUnit.getKeySize() + 4 + storingUnit.getValueSize());
+        return (Integer.BYTES + storingUnit.getKeySize() + Integer.BYTES + storingUnit.getValueSize());
     }
 }

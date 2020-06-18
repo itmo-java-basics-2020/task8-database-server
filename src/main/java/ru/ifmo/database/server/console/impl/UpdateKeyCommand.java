@@ -35,12 +35,11 @@ public class UpdateKeyCommand implements DatabaseCommand {
         }
         String prevValue = "";
         try {
-            if (database.get().read(tableName, key).isEmpty()) {
-                prevValue = database.get().read(tableName, key);
-            }
-        } catch (DatabaseException e){
+            prevValue = database.get().read(tableName, key);
+        } catch (DatabaseException e) {
         }
         database.get().write(tableName, key, value);
+        prevValue = database.get().read(tableName, key);
         return DatabaseCommandResult.success(prevValue);
     }
 }
