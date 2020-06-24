@@ -10,31 +10,38 @@ import java.util.Optional;
 
 public class UpdateKeyCommand implements DatabaseCommand {
 
-    private final ExecutionEnvironment env;
-    private final String databaseName;
-    private final String tableName;
-    private final String key;
-    private final String value;
+    private ExecutionEnvironment environment;
+    private String DatabaseName;
+    private String TableName;
+    private String Key;
+    private String Value;
 
-    public UpdateKeyCommand(ExecutionEnvironment env, String... args) {
-        if (args.length < 5) {
-            throw new IllegalArgumentException("Not enough args");
-        }
-        this.env = env;
-        this.databaseName = args[1];
-        this.tableName = args[2];
-        this.key = args[3];
-        this.value = args[4];
+    public UpdateKeyCommand(ExecutionEnvironment env, String... Args)
+    {
+        environment = env;
+
+
+        DatabaseName = Args[0];
+        TableName = Args[1];
+        Key = Args[2];
+        Value = Args[3];
     }
 
     @Override
-    public DatabaseCommandResult execute() throws DatabaseException {
-        Optional<Database> database = env.getDatabase(databaseName);
-        if (database.isEmpty()) {
-            throw new DatabaseException("No such database: " + databaseName);
+    public DatabaseCommandResult execute() {
+        Optional<Database> databaseOptional = environment.getDatabase(DatabaseName);
+        if (databaseOptional.isEmpty()) {
+            return DatabaseCommandResult.error("Such database does not exist");
         }
-        String prevValue = database.get().read(tableName, key);
-        database.get().write(tableName, key, value);
-        return DatabaseCommandResult.success(prevValue);
+
+        try {
+            databaseOptional.get().write(TableName, Key, Value);
+        } catch (DatabaseException e) {
+            return DatabaseCommandResult.error(e.getMessage());
+        }
+
+        return DatabaseCommandResult.success(Value);
     }
+
 }
+

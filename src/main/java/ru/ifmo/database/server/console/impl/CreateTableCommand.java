@@ -8,28 +8,34 @@ import ru.ifmo.database.server.logic.Database;
 
 import java.util.Optional;
 
+
 public class CreateTableCommand implements DatabaseCommand {
 
-    private final ExecutionEnvironment env;
-    private final String databaseName;
-    private final String tableName;
+    private ExecutionEnvironment environment;
+    private String DatabaseName;
+    private String TableName;
 
-    public CreateTableCommand(ExecutionEnvironment env, String... args) {
-        if (args.length < 3) {
-            throw new IllegalArgumentException("Not enough args");
-        }
-        this.databaseName = args[1];
-        this.tableName = args[2];
-        this.env = env;
+    public CreateTableCommand(ExecutionEnvironment env, String[] args) {
+        environment = env;
+
+        DatabaseName = args[0];
+        TableName = args[1];
     }
 
     @Override
-    public DatabaseCommandResult execute() throws DatabaseException {
-        Optional<Database> database = env.getDatabase(databaseName);
-        if (database.isEmpty()) {
-            throw new DatabaseException("No such database: " + databaseName);
+    public DatabaseCommandResult execute() {
+        Optional<Database> databaseOptional = environment.getDatabase(DatabaseName);
+        if (databaseOptional.isEmpty()) {
+            return DatabaseCommandResult.error("Such database does not exist");
         }
-        database.get().createTableIfNotExists(tableName);
-        return DatabaseCommandResult.success("Created table: " + tableName);
+
+        try {
+            databaseOptional.get().createTableIfNotExists(TableName);
+        } catch (DatabaseException e) {
+            return DatabaseCommandResult.error(e.getMessage());
+        }
+
+        return DatabaseCommandResult.success("Table was created successfully");
     }
+
 }
