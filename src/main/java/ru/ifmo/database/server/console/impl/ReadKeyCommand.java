@@ -9,29 +9,31 @@ import ru.ifmo.database.server.logic.Database;
 import java.util.Optional;
 
 public class ReadKeyCommand implements DatabaseCommand {
+    private ExecutionEnvironment environment;
+    private String DatabaseName;
+    private String TableName;
+    private String Key;
 
-    private final ExecutionEnvironment env;
-    private final String databaseName;
-    private final String tableName;
-    private final String key;
+    public ReadKeyCommand(ExecutionEnvironment env, String... Args)
+    {
+        environment = env;
 
-    public ReadKeyCommand(ExecutionEnvironment env, String... args) {
-        if (args.length < 4) {
-            throw new IllegalArgumentException("Not enough args");
-        }
-        this.env = env;
-        this.databaseName = args[1];
-        this.tableName = args[2];
-        this.key = args[3];
+        DatabaseName = Args[0];
+        TableName = Args[1];
+        Key = Args[2];
     }
 
     @Override
-    public DatabaseCommandResult execute() throws DatabaseException {
-        Optional<Database> database = env.getDatabase(databaseName);
-        if (database.isEmpty()) {
-            throw new DatabaseException("No such database: " + databaseName);
+    public DatabaseCommandResult execute() {
+        Optional<Database> databaseOptional = environment.getDatabase(DatabaseName);
+        if (databaseOptional.isEmpty()) {
+            return DatabaseCommandResult.error("Such database does not exist");
         }
-        String result = database.get().read(tableName, key);
-        return DatabaseCommandResult.success(result);
+
+        try {
+            return DatabaseCommandResult.success(databaseOptional.get().read(TableName, Key));
+        } catch (DatabaseException e) {
+            return DatabaseCommandResult.error(e.getMessage());
+        }
     }
 }
